@@ -1,5 +1,6 @@
 # Django-Course
 Python Django Web开发  入门到实践 视频地址：https://space.bilibili.com/252028233/#/
+
 看视频整理要点笔记
 
 ## 1 什么是Django

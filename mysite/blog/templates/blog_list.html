@@ -1,19 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>我的网站</title>
-</head>
+{# 页面标题 #}
+{% block title %}
+个人博客网站
+{% endblock title %}
 
-<body>
-    <div>
-        <a href="{% url 'home' %}">
-            <h3>个人博客网站</h3>
-        </a>
-    </div>
+{% block content %}
     <hr>
     <p>一共有 {{ blogs|length }} 篇博客 </p>
     {% comment %} {{ blogs_count }} {% endcomment %}
@@ -29,6 +21,5 @@
     {% empty %}
         <p>--- 暂无博客，敬请期待 ---</p>
     {% endfor %}
-</body>
+{% endblock content %}
 
-</html>

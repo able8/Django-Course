@@ -382,3 +382,10 @@ class BlogAdmin(admin.ModelAdmin):
 context['blogs_count'] = Blog.objects.all().count
 {{ blogs_count }}
 ```
+
+## 09.模版嵌套
+
+- `{% extends "base.html" %}` 引用基础模版
+- `<title>{% block title %}{% endblock title %}</title>` 块
+- `{% block content %}{% endblock content %}`
+

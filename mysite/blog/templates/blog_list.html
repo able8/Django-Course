@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>我的网站</title>
+</head>
+
+<body>
+    <div>
+        <a href="{% url 'home' %}">
+            <h3>个人博客网站</h3>
+        </a>
+    </div>
+    {% for blog in blogs %}
+    <a href="{% url 'blog_detail' blog.pk %}">
+        <h3>{{ blog.title }}</h3>
+    </a>
+    <hr>
+    <p>{{ blog.content }}</p>
+    {% endfor %}
+</body>
+
+</html>

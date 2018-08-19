@@ -355,6 +355,12 @@ class BlogAdmin(admin.ModelAdmin):
     ordering = ('id',)   
 ```
 
+## 08.常用的模版标签和过滤器
 
-
+- 继续搭建blog
+    - models 
+    - admin
+    - views
+    - urls
+    - templates
 

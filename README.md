@@ -180,4 +180,30 @@ urlpatterns = [
 
 ```
 
+## 05.定制后台和修改模型
+- 定制后台
+    - 设置模型显示 `__str__`
+    - 定制模型admin后台管理页面
+
+    
+```py
+# 设置模型显示 models.py
+class Article(models.Model):
+    title = models.CharField(max_length=30)
+    content = models.TextField()
+
+    def __str__(self):
+       return '<Article: %s>' % self.title 
+
+       
+# admin.py
+# Register your models here.
+@admin.register(Article) # 使用装饰器更方便醒目
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'content')
+    # ordering = ('-id', )  倒序
+    ordering = ('id', )
+
+#admin.site.register(Article, ArticleAdmin)
+```
 

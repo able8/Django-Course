@@ -24,4 +24,24 @@ Python Django Web开发  入门到实践 视频地址：https://space.bilibili.c
 - 本项目基于 Python3.6+ 和 Django2.0
 ![版本图](https://www.djangoproject.com/s/img/release-roadmap.e844db08610e.png)
 
+## 2 入门 Hello World
+- 入门仪式：创建项目，输出Hello, world
+- 创建项目命令：`django-admin  startproject mysite`
+- Django项目基本结构
+
+```
+mysite
+    ├ mysite            Pyhton 包
+    │   └ - _init__.py  
+    │   └ - settings.py 全局设置文件
+    │   └ - urls.py     全局路由控制
+    │   └ - wsgi.py     服务器使用的wsgi部署文件
+    └  manage.py        项目管理
+```
+
+- 响应请求
+    - 客户端 打开网址发送请求-》Urls 处理请求 -》Views 响应请求，返回内容
+- 启动本地服务 `python manage.py runserver`
+    
+
 

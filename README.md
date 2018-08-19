@@ -107,9 +107,29 @@ TIME_ZONE = 'Asia/Shanghai'
 
 ## 04.使用模版显示内容
 - 查看文章页面
-    - 如果通过一个处理方法获取文章唯一的标识
-    - 
+    - 如何通过一个处理方法获取文章唯一的标识
 - ` path('article/<int:article_id>', article_detail, name='article_detail'),`
     - `<int:article_id>` 默认是字符串，添加int指定整型
+- 模型的`objects`是获取和操作模型的对象
+
+
+```py
+from .models import Article
+Article.objects.get(条件) # 根据条件获取数据
+Article.objects.all()    # 获取所有数据
+Article.objects.filter(条件) # 根据条件过滤数据
+
+article = Article.objects.get(id=article_id)
+    return HttpResponse('<h2>文章标题：%s </h2><hr> 文章内容：%s' % (article.title, article.content))
+```
+
+- 获取不存在的文章，返回404页面
+
+```py
+    try:
+        article = Article.objects.get(id=article_id)
+    except Article.DoesNotExist:
+        raise Http404('not exit')
+```
 
 

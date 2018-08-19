@@ -4,7 +4,7 @@ Python Django Web开发  入门到实践 视频地址：https://space.bilibili.c
 看视频整理要点笔记
 
 ## 1 什么是Django
-####1. 什么是Django
+#### 1. 什么是Django
 
 - 官网：https://www.djangoproject.com
 - 文档：https://docs.djangoproject.com/en/2.0/
@@ -18,7 +18,7 @@ Python Django Web开发  入门到实践 视频地址：https://space.bilibili.c
   - 令人放心的安全
   - 可拓展性强
 
-####2. Django版本选择
+#### 2. Django版本选择
 
 - https://www.djangoproject.com/download/
 - 本项目基于 Python3.6+ 和 Django2.0

@@ -59,12 +59,11 @@ class Article(models.Model):
     title = models.CharField(max_length=30)
     content = models.TextField()
 ```
-- 创建模型后，先需要生成数据库迁移文件，再执行数据库迁移
+- 创建模型后，先需要生成数库迁移文件，再执行数据库迁移
     - 首先要在`settings.py`中，`INSTALLED_APPS` 添加app name
     - `python manage.py makemigrations`
     - `python manage.py migrate`
-    
-    
+       
 ``` py
 # 生成的数据库迁移文件
 class Migration(migrations.Migration):
@@ -87,4 +86,22 @@ class Migration(migrations.Migration):
 
 ```
 
+- 将模型注册到后台管理页面
+
+```py
+# admin.py
+from .models import Article
+# Register your models here.
+admin.site.register(Article)
+```
+- 进入后台找到Article 管理，添加修改数据
+- 设置语言和时区`settings.py`
+
+```py
+# LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-Hans'
+
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
+```
 

@@ -364,3 +364,21 @@ class BlogAdmin(admin.ModelAdmin):
     - urls
     - templates
 
+- 常用的模版标签
+    - 循环 for 
+    - 条件 if, ifequal, ifnoequal
+    - 链接 url
+    - 模版嵌套 block、extends、include
+    - 注释 {# #}
+- 常用的过滤器
+    - 日期 data
+    - 字数截取 truncatechars truncatechars_html
+    - 长度 length
+- 参考：[Django Built-in template tags and filters](https://docs.djangoproject.com/en/2.0/ref/templates/builtins/#built-in-filter-reference)
+
+```
+<p>一共有 {{ blogs|length }} 篇博客 </p>
+
+context['blogs_count'] = Blog.objects.all().count
+{{ blogs_count }}
+```

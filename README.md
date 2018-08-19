@@ -5,6 +5,7 @@ Python Django Web开发  入门到实践 视频地址：https://space.bilibili.c
 
 ## 1 什么是Django
 1. 什么是Django
+- 官网：https://www.djangoproject.com
 - The web framework for perfectionists with deadlines.
 - 在截止日期内，完美主义者使用的Web框架。
 - Django was invented to meet fast-moving newsroom deadlines, while satisfying the tough requirements of experienced Web developers.

@@ -301,6 +301,8 @@ pip install virtualenv
 virtualevn mysit_env # 创建 虚拟环境
 activate
 deactivate
+pip freeze   > requirements.txt # 一键导出
+pip install -r requirements.txt # 一键安装
 ```
    
 - 初步创建blog应用
@@ -313,10 +315,46 @@ cd mysite
 python manage.py startapp blog
 python manage.py migrate
 python manage.py createsuperuser
-# 修改模型，先 INSTALLED_APPS
+# 修改模型，先在INSTALLED_APPS中添加app name
 python manage.py makemigrations
 python manage.py migrate
 ``` 
+- 创建Blog模型和注册admin后台模型管理页面
+
+```py
+# models.py
+# Create your models here.
+class BlogType(models.Model):
+    type_name = models.CharField(max_length=15)
+
+    def __str__(self):
+        return self.type_name
+
+class Blog(models.Model):
+    title = models.CharField(max_length=50)
+    blog_type = models.ForeignKey(BlogType, on_delete=models.DO_NOTHING)
+    content = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    created_time = models.DateTimeField(auto_now_add=True)
+    last_updated_time = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return '<Blog: %s>' % self.title
+        
+# admin.py
+from django.contrib import admin
+from .models import BlogType, Blog
+# Register your models here.
+@admin.register(BlogType)
+class BlogTypeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'type_name')
+    
+@admin.register(Blog)
+class BlogAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'blog_type', 'author', 'created_time', 'last_updated_time')
+    ordering = ('id',)   
+```
+
 
 
 

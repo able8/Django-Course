@@ -3,7 +3,7 @@ Python Django Web开发  入门到实践 视频地址：https://space.bilibili.c
 
 看视频整理要点笔记
 
-## 1 什么是Django
+## 01.什么是Django
 #### 1. 什么是Django
 
 - 官网：https://www.djangoproject.com
@@ -24,7 +24,7 @@ Python Django Web开发  入门到实践 视频地址：https://space.bilibili.c
 - 本项目基于 Python3.6+ 和 Django2.0
 ![版本图](https://www.djangoproject.com/s/img/release-roadmap.e844db08610e.png)
 
-## 2 入门 Hello World
+## 02.入门 Hello World
 - 入门仪式：创建项目，输出Hello, world
 - 创建项目命令：`django-admin  startproject mysite`
 - Django项目基本结构
@@ -46,7 +46,7 @@ mysite
 - 创建超级管理员用户`python manage.py createsuperuser`
 - 管理员页面 http://127.0.0.1:8000/admin/
     
-## 03. Django基本应用结构
+## 03.Django基本应用结构
 - 创建Django App `python manage.py startapp article`
 - 如果页面比较多，将相似的内容用模版来管理，数据抽象为模型Models
 - 创建数据的模型models
@@ -104,4 +104,12 @@ LANGUAGE_CODE = 'zh-Hans'
 # TIME_ZONE = 'UTC'
 TIME_ZONE = 'Asia/Shanghai'
 ```
+
+## 04.使用模版显示内容
+- 查看文章页面
+    - 如果通过一个处理方法获取文章唯一的标识
+    - 
+- ` path('article/<int:article_id>', article_detail, name='article_detail'),`
+    - `<int:article_id>` 默认是字符串，添加int指定整型
+
 

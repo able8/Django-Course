@@ -42,6 +42,11 @@ mysite
 - 响应请求
     - 客户端 打开网址发送请求-》Urls 处理请求 -》Views 响应请求，返回内容
 - 启动本地服务 `python manage.py runserver`
+- 执行数据库迁移，新建数据库 `python manage.py migrate`
+- 创建超级管理员用户`python manage.py createsuperuser`
+- 管理员页面 http://127.0.0.1:8000/admin/
     
+## 03. Django基本应用结构
+- 
 
 

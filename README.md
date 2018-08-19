@@ -184,7 +184,6 @@ urlpatterns = [
 - 定制后台
     - 设置模型显示 `__str__`
     - 定制模型admin后台管理页面
-
     
 ```py
 # 设置模型显示 models.py
@@ -205,5 +204,35 @@ class ArticleAdmin(admin.ModelAdmin):
     ordering = ('id', )
 
 #admin.site.register(Article, ArticleAdmin)
+```
+
+- 修改模型models，修改后台显示字段
+    - 每次修改模型需要更新数据库
+    - `python manage.py makemigrations`
+    - `python manage.py migrate`
+    - 需要设置默认值
+
+```py
+class Article(models.Model):
+    title = models.CharField(max_length=30)
+    content = models.TextField()
+    # created_time = models.DateTimeField(default=timezone.now)
+    created_time = models.DateTimeField(auto_now_add=True)
+    last_updated_time = models.DateTimeField(auto_now=True)
+    author = models.ForeignKey(User, on_delete=models.DO_NOTHING, default=1) 
+    is_deleted = models.BooleanField(default=False)
+    readed_num = models.IntegerField(default=0)
+
+# admin.py 后台显示字段
+@admin.register(Article)
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'author','is_deleted', 'created_time', 'last_updated_time', 'content')
+    # ordering = ('-id', )  倒序
+    ordering = ('id', )   
+    
+# 使用，过滤删除的  views.py
+def article_list(request):
+    # articles = Article.objects.all()
+    articles = Article.objects.filter(is_deleted=False)
 ```
 

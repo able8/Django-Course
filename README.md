@@ -134,3 +134,19 @@ article = Article.objects.get(id=article_id)
 
 - 使用模版，前端页面和后端代码分离，降低耦合性
 
+- 查看 django 源码，了解函数功能
+    - VS code 右键 速览定义 可以显示源码
+    - 找到安装路径`pip show django`
+    - 进入查看源码文件
+
+- 简化，用render_to_response省略请求参数，用get_object_or_404代替异常处理
+
+```py
+# article = Article.objects.get(id=article_id)
+article = get_object_or_404(Article, pk=article_id)
+context = {}
+context['article_obj'] = article
+# return render(request, 'article_detail.html', context)
+return render_to_response('article_detail.html', context) # 不需要request参数l
+```
+

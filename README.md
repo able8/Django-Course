@@ -1,7 +1,7 @@
 # Django_Course
 Python Django Web开发  入门到实践 视频地址：https://space.bilibili.com/252028233/#/
 
-看视频整理要点笔记
+看视频整理要点笔记: 
 
 ## 01.什么是Django
 #### 1. 什么是Django
@@ -162,6 +162,22 @@ def article_list(request):
     context['articles'] = articles
     return render_to_response('article_list.html', context)
 ```
+- 路由管理，总urls包含app的urls，总分结构，便于维护
 
+```py
+# 总路由
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', views.index),
+    path('article/', include('article.urls'))
+]
+# app 路由
+urlpatterns = [
+    # localhost:8000/article/
+    path('', views.article_list, name='article_list'),
+    path('<int:article_id>', views.article_detail, name='article_detail'),
+]
+
+```
 
 

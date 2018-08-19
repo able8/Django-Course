@@ -47,7 +47,44 @@ mysite
 - 管理员页面 http://127.0.0.1:8000/admin/
     
 ## 03. Django基本应用结构
-- 如果页面比较多，将相似的内容用模版来管理
 - 创建Django App `python manage.py startapp article`
+- 如果页面比较多，将相似的内容用模版来管理，数据抽象为模型Models
+- 创建数据的模型models
+
+```python
+from django.db import models
+
+# Create your models here.
+class Article(models.Model):
+    title = models.CharField(max_length=30)
+    content = models.TextField()
+```
+- 创建模型后，先需要生成数据库迁移文件，再执行数据库迁移
+    - 首先要在`settings.py`中，`INSTALLED_APPS` 添加app name
+    - `python manage.py makemigrations`
+    - `python manage.py migrate`
+    
+    
+``` py
+# 生成的数据库迁移文件
+class Migration(migrations.Migration):
+
+    initial = True
+
+    dependencies = [
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='Article',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('title', models.CharField(max_length=30)),
+                ('content', models.TextField()),
+            ],
+        ),
+    ]
+
+```
 
 

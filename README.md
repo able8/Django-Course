@@ -132,4 +132,5 @@ article = Article.objects.get(id=article_id)
         raise Http404('not exit')
 ```
 
+- 使用模版，前端页面和后端代码分离，降低耦合性
 

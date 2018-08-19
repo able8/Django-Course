@@ -280,7 +280,36 @@ def article_list(request):
         - Linux
         - 网站部署
         
-        
-        
+## 07.构建个人博客网站
+- 网站的功能模块 即 Django App
+    - 博客
+        - 博文
+        - 博客分类
+        - 博客标签
+    - 评论
+    - 点赞
+    - 阅读
+    - 用户
+
+- 开启本地虚拟环境
+    - 隔开python项目的运行环境
+    - 避免多个项目之前python库的冲突
+    - 完整便捷导出python库的列表
+ 
+```sh
+pip install virtualenv
+virtualevn mysit_env # 创建 虚拟环境
+activate
+deactivate
+```
+   
+- 初步创建blog应用
+    - 博文 + 博文分类
+  
+```sh
+django-admin startproject mysite
+cd mysite
+python manage.py startapp blog
+```     
 
 

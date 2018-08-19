@@ -47,6 +47,7 @@ mysite
 - 管理员页面 http://127.0.0.1:8000/admin/
     
 ## 03. Django基本应用结构
-- 
+- 如果页面比较多，将相似的内容用模版来管理
+- 创建Django App `python manage.py startapp article`
 
 

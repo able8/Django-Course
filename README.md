@@ -149,4 +149,19 @@ context['article_obj'] = article
 # return render(request, 'article_detail.html', context)
 return render_to_response('article_detail.html', context) # 不需要request参数l
 ```
+- 获取文章列表
+    - 用url模版代替硬编码，方便后续修改
+    - `<a href="/article/{{ article.pk }}">`
+    - `<a href="{% url 'article_detail' article.pk %}">`
+
+
+```py
+def article_list(request):
+    articles = Article.objects.all()
+    context = {}
+    context['articles'] = articles
+    return render_to_response('article_list.html', context)
+```
+
+
 

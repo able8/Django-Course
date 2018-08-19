@@ -304,12 +304,19 @@ deactivate
 ```
    
 - 初步创建blog应用
-    - 博文 + 博文分类
+    - 博文 + 博客分类
+    - 为了好管理，约定一篇博客只属于一个分类
   
 ```sh
 django-admin startproject mysite
 cd mysite
 python manage.py startapp blog
-```     
+python manage.py migrate
+python manage.py createsuperuser
+# 修改模型，先 INSTALLED_APPS
+python manage.py makemigrations
+python manage.py migrate
+``` 
+
 
 

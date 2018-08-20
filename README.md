@@ -419,4 +419,11 @@ context['blogs_count'] = Blog.objects.all().count
 
 - 使用CSS 层叠样式表，修饰html
     - 使用Chrome浏览器审查元素，方便调试修改css，改好了再复制样式
-    
+
+- 新建static文件夹，专门存放静态文件，css js 图片
+    - 在`manage.py`目录创建文件夹`static`，存放静态文件
+    - 设置能够找到目录`settings - STATICFILES_DIRS`
+    - `os.path.join(BASE_DIR, 'static')`
+    - 引用`<link rel="stylesheet" href="/static/base.css">
+    - 或者 先`{% load staticfiles %}`
+    - 再`<link rel="stylesheet" href="{% static 'base.css' %}">`

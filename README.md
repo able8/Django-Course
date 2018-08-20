@@ -394,5 +394,9 @@ context['blogs_count'] = Blog.objects.all().count
     - 设置能够找到目录`settings - TEMPLATES - DIRS `
     - `os.path.join(BASE_DIR, 'templates'),`
     - 将 `base.html` 放到公共模版文件夹
+- 模版文件设置建议，为了方便迁移和公有，放到project的templates文件夹
+    - 为了防止名字冲突，在templates新建app name的文件夹，防止混淆
+    - 修改views.py里的文件路径
+
 
 

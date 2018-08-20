@@ -1,6 +1,6 @@
 {% load staticfiles %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
@@ -9,6 +9,8 @@
     <title>{% block title %}{% endblock title %}</title>
     <!-- <link rel="stylesheet" href="/static/base.css"> -->
     <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap-3.3.7/css/bootstrap.min.css' %}">
+ 
     {% block header_extends %}
     {% endblock header_extends %}
 </head>
@@ -22,6 +24,9 @@
         <a href="{% url 'blog_list' %}">博客</a>
     </div>
         {% block content %}{% endblock content %}
+
+    <script type="text/javascript" src="{% static 'jquery-1.12.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap-3.3.7/js/bootstrap.min.js' %}"></script>
 </body>
 
 </html>

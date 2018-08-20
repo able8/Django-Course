@@ -427,3 +427,25 @@ context['blogs_count'] = Blog.objects.all().count
     - 引用`<link rel="stylesheet" href="/static/base.css">
     - 或者 先`{% load staticfiles %}`
     - 再`<link rel="stylesheet" href="{% static 'base.css' %}">`
+
+## 11.CSS框架协助前端布局
+
+- 为什么使用CSS框架
+    - 让web开发更迅速、简单
+    - 使用现成的框架 省时又省力
+- 如何选择CSS框架
+    - 易用性
+    - 兼容性
+    - 大小、效果和功能
+- Bootstrap 
+    - 文档齐全，使用简单
+    - 兼容较多浏览器，非轻量级
+    - 响应式布局、移动设备优先
+    - 组件齐全，扁平简洁
+- 部署Bootstrap
+    - 打开官网 <http://www.Bootcss.com>
+    - 下载 [链接](https://v3.bootcss.com/getting-started/#download) 、引用、使用
+    - `mini`时压缩过的体积小
+    - 组件 [字体图标](https://v3.bootcss.com/components/)
+    - [布局容器](https://v3.bootcss.com/css/#overview-container)
+    - [栅格系统](https://v3.bootcss.com/css/#grid)

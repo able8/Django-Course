@@ -389,3 +389,10 @@ context['blogs_count'] = Blog.objects.all().count
 - `<title>{% block title %}{% endblock title %}</title>` 块
 - `{% block content %}{% endblock content %}`
 
+- 全局模版文件夹, 存放公共模版文件
+    - 在`manage.py`目录创建文件夹`templates`，存放公共模版文件
+    - 设置能够找到目录`settings - TEMPLATES - DIRS `
+    - `os.path.join(BASE_DIR, 'templates'),`
+    - 将 `base.html` 放到公共模版文件夹
+
+

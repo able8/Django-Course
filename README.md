@@ -416,3 +416,7 @@ context['blogs_count'] = Blog.objects.all().count
     - 导航栏：xxx的网站  首页 
     - 主体内容
     - 尾注
+
+- 使用CSS 层叠样式表，修饰html
+    - 使用Chrome浏览器审查元素，方便调试修改css，改好了再复制样式
+    

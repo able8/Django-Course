@@ -5,5 +5,16 @@
 {% endblock title %}
 
 {% block content %}
-    <h3>欢迎访问我的网站，随便看看</h3>
+    <h3 class="home-content">欢迎访问我的网站，随便看看</h3>
+
+    <style type="text/css">
+        h3.home-content {
+        font-size: 2em;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        }
+    </style>
+
 {% endblock content %}

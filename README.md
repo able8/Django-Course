@@ -409,3 +409,10 @@ context['blogs_count'] = Blog.objects.all().count
 - 模版文件设置建议，为了方便迁移和公有，放到project的templates文件夹
     - 为了防止名字冲突，在templates新建app name的文件夹，防止混淆
     - 修改views.py里的文件路径
+
+## 10.使用CSS美化页面
+
+- 页面设计
+    - 导航栏：xxx的网站  首页 
+    - 主体内容
+    - 尾注

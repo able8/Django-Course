@@ -424,7 +424,7 @@ context['blogs_count'] = Blog.objects.all().count
     - 在`manage.py`目录创建文件夹`static`，存放静态文件
     - 设置能够找到目录`settings - STATICFILES_DIRS`
     - `os.path.join(BASE_DIR, 'static')`
-    - 引用`<link rel="stylesheet" href="/static/base.css">
+    - 引用`<link rel="stylesheet" href="/static/base.css">`
     - 或者 先`{% load staticfiles %}`
     - 再`<link rel="stylesheet" href="{% static 'base.css' %}">`
 
@@ -445,7 +445,8 @@ context['blogs_count'] = Blog.objects.all().count
 - 部署Bootstrap
     - 打开官网 <http://www.Bootcss.com>
     - 下载 [链接](https://v3.bootcss.com/getting-started/#download) 、引用、使用
-    - `mini`时压缩过的体积小
+    - `mini`是压缩过的体积小
     - 组件 [字体图标](https://v3.bootcss.com/components/)
     - [布局容器](https://v3.bootcss.com/css/#overview-container)
     - [栅格系统](https://v3.bootcss.com/css/#grid)
+    - html 自动补全技巧 div.nav  li*2>2  按回车

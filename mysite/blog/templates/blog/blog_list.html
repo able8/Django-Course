@@ -12,11 +12,12 @@
         <div class="row">
             <div class="col-xs-12 col-sm-8 col-md-9 col-lg-10">
                 <div class="panel panel-default">
+
                     <div class="panel-heading">{% block blog_list_tilte %}
-                            博客列表 （ 一共有 {{ blogs|length }} 篇博客）
+                            博客列表 （ 一共有 {{ page_of_blogs.paginator.count }} 篇博客）
                     {% endblock blog_list_tilte %}</div>
                     <div class="panel-body">
-                        {% for blog in blogs %}
+                        {% for blog in page_of_blogs %}
                         <div class="blog">
                             <h3><a href="{% url 'blog_detail' blog.pk %}">
                             {{ blog.title }}
@@ -34,6 +35,36 @@
                             <h3>暂无博客，敬请期待</h3>
                         </div>
                         {% endfor %}
+
+<ul class="pagination">
+    <li>
+        
+        {% if page_of_blogs.has_previous %}
+            <a href="?page={{ page_of_blogs.previous_page_number }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        {% else %}
+                <span aria-hidden="true">&laquo;</span>
+        {% endif %}
+    </li>
+    {# 全部页面 #}
+    {% for page_num in  page_of_blogs.paginator.page_range %}
+        <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+    {% endfor %}
+
+    <li>
+        {# 下一页 #}
+        {% if page_of_blogs.has_next %}
+            <a href="?page={{ page_of_blogs.next_page_number }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        {% else %}
+                <span aria-hidden="true">&raquo;</span> 
+        {% endif %}
+    
+    </li>
+</ul>
+
                     </div>
                 </div>
             </div>

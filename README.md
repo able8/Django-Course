@@ -459,3 +459,101 @@ context['blogs_count'] = Blog.objects.all().count
 - 添加 [框架自带的图标](https://v3.bootcss.com/components/#glyphicons)
 - Django静态文件命名空间
     - 为了避免冲突问题 `static/appname/xxx.css`
+
+## 13.分页和shell命令行模式
+
+- 通过讲解分页功能进一步夯实基础，包括shell命令行模式、模型操作、模版标签、分页器、GET请求。
+- 为什么需要分页? 
+    - 当博客文章数过多，全部加载过慢，就需要分页加载
+- shell 命令行模式快速学习实践，添加博客
+    - `python manage.py shell`
+    - for 执行新增博客代码
+
+- 模型新增对象
+
+```python
+python manage.py shell
+from blog.models import Blog
+blog = Blog() # 实例化
+blog.title = 'xxx'
+...
+blog.save()
+```
+
+- shell 命令行 模式 操作模型
+```python
+>>> from blog.models import Blog
+>>> dir()
+['Blog', '__builtins__']
+>>> Blog.objects.all()
+<QuerySet [<Blog: <Blog: 第一篇博客>>, <Blog: <Blog: 第二篇博客>>, <Blog: <Blog: 第三篇博客>>, <Blog: <Blog: 第四篇长内容>>]>
+>>> Blog.objects.count()
+4
+>>> blog = Blog()
+>>> dir()
+['Blog', '__builtins__', 'blog']
+>>> blog.title = 'shell 下第1篇'
+>>> blog.content = 'xxxx'
+>>> from blog.models import BlogType
+>>> BlogType.objects.all()
+<QuerySet [<BlogType: 随笔>, <BlogType: 感悟>, <BlogType: 其他>]>
+>>> BlogType.objects.all()[2]
+<BlogType: 其他>
+>>> blog_type = BlogType.objects.all()[2]
+>>> blog.blog_type = blog_type
+>>> from django.contrib.auth.models import User
+>>> User.objects.all()
+<QuerySet [<User: able>]>
+>>> user = User.objects.all()[0]
+>>> blog.author = user
+>>> blog.save()
+>>> Blog.objects.all()
+<QuerySet [<Blog: <Blog: 第一篇博客>>, <Blog: <Blog: 第二篇博客>>, <Blog: <Blog: 第三篇博客>>, <Blog: <Blog: 第四篇长内容>>, <Blog: <Blog: shell 下第1篇>>]>
+>>> dir(blog) # 查看所有 属性和方法，方便稍后调用
+
+# 批量添加
+>>> for i in range(1, 31):
+...     blog = Blog()
+...     blog.title = 'for %s' % i
+...     blog.content = 'xxxx:%s' % i
+...     blog.blog_type = blog_type
+...     blog.author = user
+...     blog.save()
+...
+>>> Blog.objects.all().count()
+35
+```
+
+- 分页器实现分页
+    - 导入`from django.core.paginator import Paginator`
+    - 实例化`paginator = Paginator(object_list, each_page_count)`
+    - 具体页面`page1 = paginator.page(1)`
+
+```python
+>>> from django.core.paginator import Paginator
+>>> from blog.models import Blog
+>>> blogs = Blog.objects.all()
+>>> blogs.count()
+35
+>>> paginator = Paginator(blogs, 10)
+<string>:1: UnorderedObjectListWarning: Pagination may yield inconsistent results with an unordered object_list: <class 'blog.models.Blog'> QuerySet.
+# 需要给模型添加 排序方式
+    class Meta:
+        ordering = ['-created_time']
+# 然后数据迁移       
+python manage.py makemigrations
+python manage.py migrate
+
+>>> paginator = Paginator(blogs, 10)
+>>> paginator
+<django.core.paginator.Paginator object at 0x1021de550>
+>>> dir(paginator)
+>> paginator.count
+35
+>>> paginator.num_pages
+4
+>>> page1 = paginator.page(1)
+>>> page1
+<Page 1 of 4>
+>>> page1.object_list
+```

@@ -563,3 +563,21 @@ python manage.py migrate
 - 优化分页显示，提升用户体验
     - 不要显示太多页码选择，影响页面布局
     - 高亮显示当前页码
+- 页码栏，优化显示的页码范围，这部分看似简单，内容不少
+
+```python
+current_page_num = page_of_blogs.number # 获取当前页码
+# 获取当前页的前后2页的页码范围
+page_range = [x for x in range(current_page_num - 2, current_page_num + 3) if x in paginator.page_range ]
+
+# 加上省略号间隔页码
+if page_range[0] - 1 >= 2:
+    page_range.insert(0, '...')
+if paginator.num_pages - page_range[-1] >= 2:
+    page_range.append('...')
+# 加上首页和尾页
+if page_range[0] != 1:
+    page_range.insert(0, 1)
+if page_range[-1] != paginator.num_pages:
+    page_range.append(paginator.num_pages)
+```

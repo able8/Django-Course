@@ -5,7 +5,7 @@ from .models import Blog, BlogType
 
 def blog_list(request):
     blogs_all_list = Blog.objects.all()
-    paginator = Paginator(blogs_all_list, 10) # 每10页进行分页
+    paginator = Paginator(blogs_all_list, 2) # 每10篇进行分页
     page_num = request.GET.get('page', 1) # 获取url的页面参数（GET请求）
     page_of_blogs = paginator.get_page(page_num)
     context = {}

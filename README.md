@@ -557,3 +557,9 @@ python manage.py migrate
 <Page 1 of 4>
 >>> page1.object_list
 ```
+
+## 14.优化分页展示
+
+- 优化分页显示，提升用户体验
+    - 不要显示太多页码选择，影响页面布局
+    - 高亮显示当前页码

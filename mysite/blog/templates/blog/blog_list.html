@@ -2,6 +2,11 @@
 {% block title %} 个人博客网站 {% endblock title %}
 {% block nav_blog_active%}active{% endblock%}
 
+{% load staticfiles %}
+{% block header_extends %}
+    <link rel="stylesheet" href="{% static 'blog/blog.css' %}">
+{% endblock header_extends %}
+
 {% block content %}
     <div class="container">
         <div class="row">
@@ -28,7 +33,7 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">博客分类</div>
                         <div class="panel-body">
-                            <ul style="list-style-type: none;">
+                            <ul class="blog-types">
                                 {% for blog_type in blog_types %}
                                 <li><a href="{% url 'blogs_with_type' blog_type.pk %}">{{ blog_type.type_name }}</a>
                                 </li>

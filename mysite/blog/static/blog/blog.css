@@ -13,5 +13,19 @@ div.blog h3 {
 }
 
 div.blog p.blog-info {
-    margin-bottom: 
+    margin-bottom: 0;
+}
+
+ul.blog-info-description {
+    list-style-type: none;
+    margin-bottom: 2em;
+}
+
+ul.blog-info-description li{
+    display: inline-block;
+    margin-right: 2em;
+}
+
+div.blog-content {
+    text-indent: 2em;
 }

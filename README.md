@@ -457,3 +457,5 @@ context['blogs_count'] = Blog.objects.all().count
 - [栅格系统原理和代码](https://v3.bootcss.com/css/#grid)
 - [博客分类使用的面板代码](https://v3.bootcss.com/components/#panels)
 - 添加 [框架自带的图标](https://v3.bootcss.com/components/#glyphicons)
+- Django静态文件命名空间
+    - 为了避免冲突问题 `static/appname/xxx.css`

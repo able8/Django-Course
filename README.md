@@ -456,3 +456,4 @@ context['blogs_count'] = Blog.objects.all().count
 - 添加博客列表和分类两栏，并根据屏幕自适应调整位置大小
 - [栅格系统原理和代码](https://v3.bootcss.com/css/#grid)
 - [博客分类使用的面板代码](https://v3.bootcss.com/components/#panels)
+- 添加 [框架自带的图标](https://v3.bootcss.com/components/#glyphicons)

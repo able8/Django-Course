@@ -584,3 +584,42 @@ if page_range[-1] != paginator.num_pages:
 
 - 公用全局设置放在setting中，统一管理
     - 引用`from django.conf import settings; settings.xxx`
+
+- [分页组件](https://v3.bootcss.com/components/#pagination)
+
+## 15.上下篇博客和按月分类
+
+- 对比当前博客，得到上一篇或下一篇
+
+```python
+blog = get_object_or_404(Blog, pk=blog_pk)
+context['previous_blog'] = Blog.objects.filter(created_time__gt=blog.created_time).last()
+context['next_blog'] = Blog.objects.filter(created_time__lt=blog.created_time).first()
+context['blog'] = blog
+```
+
+- `.objects.filter()` 筛选条件
+    - 比较 `__gt` `__gte` `__lt` `__lte`
+    - 包含 `__contains`
+    - 开头是 `__startswith`
+    - 结尾是 `__endswith`
+    - `__in` `__range`
+
+```python
+>>> from blog.models import Blog
+>>> Blog.objects.filter(title__contains='shell')
+<QuerySet [<Blog: <Blog: shell 下第1篇>>]>
+>>> Blog.objects.filter(title__startswith='shell')
+<QuerySet [<Blog: <Blog: shell 下第1篇>>]>
+>>> Blog.objects.filter(id__in=[1,2,3])
+<QuerySet [<Blog: <Blog: 第一篇博客>>, <Blog: <Blog: 第二篇博客>>, <Blog: <Blog: 第三篇博客>>]>
+>>> Blog.objects.filter(id__range=(1, 3))
+<QuerySet [<Blog: <Blog: 第一篇博客>>, <Blog: <Blog: 第二篇博客>>, <Blog: <Blog: 第三篇博客>>]>
+```
+
+- `.objects.exclude()` 排出条件，和filter相反，都是得到查询QuerySet
+- 加入双下划线筛选，用于
+    - 字段查询类型
+    - 外键拓展，以博客分类为例
+    - 日期拓展，以按月份为例
+    - 支持链式重新，可以一直链接下去

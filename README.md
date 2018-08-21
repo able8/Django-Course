@@ -581,3 +581,6 @@ if page_range[0] != 1:
 if page_range[-1] != paginator.num_pages:
     page_range.append(paginator.num_pages)
 ```
+
+- 公用全局设置放在setting中，统一管理
+    - 引用`from django.conf import settings; settings.xxx`

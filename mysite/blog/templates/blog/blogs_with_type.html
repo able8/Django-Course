@@ -3,6 +3,5 @@
 
 {% block blog_list_tilte %}
     分类：{{ blog_type.type_name }}
-    （ 一共有 {{ blogs|length }} 篇博客）
     <a href="{% url 'blog_list' %}">查看全部博客</a>
 {% endblock blog_list_tilte %}

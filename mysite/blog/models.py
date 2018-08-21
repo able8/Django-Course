@@ -20,4 +20,5 @@ class Blog(models.Model):
         return '<Blog: %s>' % self.title
 
     class Meta:
-        ordering = ['-created_time']
+        # ordering = ['-created_time']
+        ordering = ['created_time']

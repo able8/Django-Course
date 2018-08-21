@@ -17,7 +17,7 @@
                             博客列表
                     {% endblock blog_list_tilte %}</div>
                     <div class="panel-body">
-                        {% for blog in page_of_blogs %}
+                        {% for blog in blogs %}
                         <div class="blog">
                             <h3><a href="{% url 'blog_detail' blog.pk %}">
                             {{ blog.title }}

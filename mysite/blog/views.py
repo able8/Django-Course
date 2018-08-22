@@ -3,8 +3,7 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.db.models import Count
 from .models import Blog, BlogType
-from django.contrib.contenttypes.models import ContentType
-from read_statistics.models import ReadNum
+from read_statistics.utils import read_statistics_one_read
 
 
 def get_blog_list_common_date(request, blogs_all_list):
@@ -76,24 +75,12 @@ def blogs_with_date(request, year, month):
 
 def blog_detail(request, blog_pk):
     blog = get_object_or_404(Blog, pk=blog_pk)
-    if not request.COOKIES.get('blog_%s_readed' % blog_pk):
-        ct = ContentType.objects.get_for_model(Blog)
-
-        if ReadNum.objects.filter(content_type=ct, object_id=blog.pk).count():
-            # 存在记录
-            readnum = ReadNum.objects.get(content_type=ct, object_id=blog.pk)
-        else:
-            # 不存在记录
-            readnum = ReadNum(content_type=ct, object_id=blog.pk)
-        # 计数加1
-        readnum.read_num += 1
-        readnum.save()
+    read_cookie_key = read_statistics_one_read(request, blog)
 
     context = {}
     context['previous_blog'] = Blog.objects.filter(created_time__gt=blog.created_time).last()
     context['next_blog'] = Blog.objects.filter(created_time__lt=blog.created_time).first()
     context['blog'] = blog
     response = render_to_response('blog/blog_detail.html', context)
-    # response.set_cookie('blog_%s_readed' % blog_pk, 'true', max_age=60) # 60s 失效
-    response.set_cookie('blog_%s_readed' % blog_pk, 'true') # 默认退出浏览器失效
+    response.set_cookie(read_cookie_key, 'true') # 阅读cookie标记
     return response

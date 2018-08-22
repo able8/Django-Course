@@ -754,6 +754,8 @@ return response
 
 ## 19.博客阅读计数优化
 
+### 方法一
+
 - 添加新的计数模型，计数功能独立，减少对原博客的影响
     - 计数字段  和  博客 通过 外键 关联
 
@@ -781,6 +783,8 @@ if not request.COOKIES.get('blog_%s_readed' % blog_pk):
     readnum.read_num += 1
     readnum.save()
 ```
+
+### 方法二
 
 - 创建专门用于计数的应用，独立出更加通用的计数功能，可以对任意模型计数
     - 计数： 关联哪个模型  +  对应主键值
@@ -840,3 +844,5 @@ class ReadNumAdmin(admin.ModelAdmin):
 >>> rn.read_num
 11
 ```
+
+- 最后，拆分优化，重新封装公共应用，抽出公用的方法

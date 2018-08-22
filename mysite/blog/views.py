@@ -35,13 +35,21 @@ def get_blog_list_common_date(request, blogs_all_list):
         blog_types_list.append(blog_type)
     '''
 
+    # 获取日期归档对应的博客数量
+    blog_dates = Blog.objects.dates('created_time', 'month', order='DESC')
+    blog_dates_dict = {}
+    for blog_date in blog_dates:
+        blog_count = Blog.objects.filter(created_time__year=blog_date.year, created_time__month=blog_date.month).count()
+        blog_dates_dict[blog_date] = blog_count
+
     context = {}
     context['blogs'] = page_of_blogs
     context['page_of_blogs'] = page_of_blogs
     context['page_range'] = page_range
     # context['blog_types'] = BlogType.objects.all()
     context['blog_types'] = BlogType.objects.annotate(blog_count=Count('blog'))
-    context['blog_dates'] = Blog.objects.dates('created_time', 'month', order='DESC')
+    # context['blog_dates'] = Blog.objects.dates('created_time', 'month', order='DESC')
+    context['blog_dates'] = blog_dates_dict
     return context
 
 

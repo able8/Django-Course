@@ -6,6 +6,10 @@
 body {
     margin-top: 70px!important;
 }
+
+ul {
+    list-style: none;
+}
 /* div.nav{
     background-color: #eee;
     border-bottom: 1px solid #ccc;

@@ -99,6 +99,19 @@
                             </ul>
                         </div>
                     </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">日期归档</div>
+                            <div class="panel-body">
+                            <ul>
+                                {% for blog_date in blog_dates  %}
+                                <a href="{% url 'blogs_with_date' blog_date.year blog_date.month %}">
+                                <li>{{ blog_date | date:'Y年m月' }}</li>
+                                </a>
+                                {% endfor %}
+                            </ul>
+                            </div>
+                    </div>
             </div>
         </div>
     </div>

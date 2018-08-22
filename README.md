@@ -481,6 +481,7 @@ blog.save()
 ```
 
 - shell 命令行 模式 操作模型
+
 ```python
 >>> from blog.models import Blog
 >>> dir()
@@ -623,3 +624,7 @@ context['blog'] = blog
     - 外键拓展，以博客分类为例
     - 日期拓展，以按月份为例
     - 支持链式重新，可以一直链接下去
+- 按日期查询 [.objects.dates()](https://docs.djangoproject.com/zh-hans/2.0/ref/models/querysets/#dates)
+    - "month" returns a list of all distinct year/month values for the field.
+    - `Blog.objects.dates('created_time', 'month', order='DESC')`
+    - asc 按升序排列, desc 按降序排列

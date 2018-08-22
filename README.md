@@ -730,3 +730,24 @@ content = RichTextUploadingField()
 - 简单计数处理
     - Blog模型添加数字字段记录
     - 每次打开链接，记录+1
+
+- 自定义计数规则， 怎样才算阅读一次
+    - 无视是否同一个人，每次打开都记录，会造成刷阅读量，刷新即可
+    - 若同一个人，间隔多久才算阅读1次
+- 通过设置浏览器cookie计数，防止一人多次计数
+
+```py
+# 如果浏览器中没有设置的cookie了，就计数
+if not request.COOKIES.get('blog_%s_readed' % blog_pk):
+    blog.readed_num += 1
+    blog.save()
+
+response = render_to_response('blog/blog_detail.html', context)
+# response.set_cookie('blog_%s_readed' % blog_pk, 'true', max_age=60) # 60s 失效
+response.set_cookie('blog_%s_readed' % blog_pk, 'true') # 默认退出浏览器失效
+return response
+```
+
+- COOKIES 计数方法的缺点
+    - 后台编辑博客可能影响计数，而且计数的更新也会更新了博客的时间
+    - 功能单一，无法统计某一天的阅读量

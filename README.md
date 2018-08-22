@@ -646,3 +646,10 @@ context['blog_types'] = blog_types_list
 ```
 
 - 方法二，使用annotate拓展查询字段，注释统计信息
+
+```python
+from django.db.models import Count
+
+BlogType.objects.annotate(blog_count=Count('blog'))
+context['blog_types'] = BlogType.objects.annotate(blog_count=Count('blog'))
+```

@@ -781,3 +781,62 @@ if not request.COOKIES.get('blog_%s_readed' % blog_pk):
     readnum.read_num += 1
     readnum.save()
 ```
+
+- 创建专门用于计数的应用，独立出更加通用的计数功能，可以对任意模型计数
+    - 计数： 关联哪个模型  +  对应主键值
+    - [ContentType](https://docs.djangoproject.com/en/2.0/ref/contrib/contenttypes/)
+
+- 创建专门用于计数的应用
+    - `python manage.py startapp read_statistics`
+- 添加计数 models
+
+```py
+from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
+# Create your models here.
+class ReadNum(models.Model):
+    read_num = models.IntegerField(default=0)
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+```
+
+- 注册应用
+- 数据迁移
+- 添加后台管理
+
+```py
+from django.contrib import admin
+from .models import ReadNum
+# Register your models here.
+@admin.register(ReadNum)
+class ReadNumAdmin(admin.ModelAdmin):
+    list_display = ('read_num', 'content_object')
+```
+
+- 在Blog模型中引用添加ReadNum
+
+```py
+# shell 中实践 使用
+>>> from read_statistics.models import ReadNum
+>>> from blog.models import Blog
+>>> from django.contrib.contenttypes.models import ContentType
+>>> ContentType.objects.filter(model='blog')
+<QuerySet [<ContentType: blog>]>
+>>> ContentType.objects.get_for_model(Blog)
+<ContentType: blog>
+>>> ct = ContentType.objects.get_for_model(Blog)
+>>> blog = Blog.objects.first()
+>>> blog.pk
+1
+>>> ReadNum.objects.filter(content_type=ct, object_id=blog.pk)
+<QuerySet [<ReadNum: ReadNum object (2)>]>
+>>> rn = ReadNum.objects.filter(content_type=ct, object_id=blog.pk)[0]
+>>> rn
+<ReadNum: ReadNum object (2)>
+>>> rn.read_num
+11
+```

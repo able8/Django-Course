@@ -17,7 +17,7 @@
                 <li>分类： <a href="{% url 'blogs_with_type' blog.blog_type.pk %}">{{ blog.blog_type }}</a></li>
                 <li>发布日期： {{ blog.created_time|date:'Y-m-d H:i:s' }} </li>
             </ul>
-            <div class="blog-content">{{ blog.content }}</div>
+            <div class="blog-content">{{ blog.content|safe }}</div>
             <div class="blog-more">
                 <p>上一篇: 
                     {% if previous_blog %}

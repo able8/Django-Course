@@ -666,3 +666,20 @@ for blog_date in blog_dates:
 
 context['blog_dates'] = blog_dates_dict
 ```
+
+## 17.博客后台富文本编辑
+
+- 使用html丰富页面
+- 简单文本编辑 -》直接贴入html代码
+
+```sh
+{{ blog.content|safe }}  # 安全的，可以识别html tab
+{{ blog.content|striptags|truncatechars:120 }} # 有时不用显示tag，过滤掉tag
+```
+
+- 富文本编辑 -》 最终解析成html，富文本编辑器、markdown编辑器
+- 使用django-ckeditor, 选择标准
+    - 具有基本的富文本编辑功能
+    - 有持续更新维护
+    - 可以查看源码
+    - 可以上传图片

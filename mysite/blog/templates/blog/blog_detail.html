@@ -16,6 +16,7 @@
                 <li>作者： {{ blog.author }}</li>
                 <li>分类： <a href="{% url 'blogs_with_type' blog.blog_type.pk %}">{{ blog.blog_type }}</a></li>
                 <li>发布日期： {{ blog.created_time|date:'Y-m-d H:i:s' }} </li>
+                <li>阅读({{ blog.readed_num }})</li>
             </ul>
             <div class="blog-content">{{ blog.content|safe }}</div>
             <div class="blog-more">

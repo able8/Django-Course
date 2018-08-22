@@ -73,8 +73,11 @@ def blogs_with_date(request, year, month):
     return render_to_response('blog/blogs_with_date.html', context)
 
 def blog_detail(request, blog_pk):
-    context = {}
     blog = get_object_or_404(Blog, pk=blog_pk)
+    blog.readed_num += 1
+    blog.save()
+
+    context = {}
     context['previous_blog'] = Blog.objects.filter(created_time__gt=blog.created_time).last()
     context['next_blog'] = Blog.objects.filter(created_time__lt=blog.created_time).first()
     context['blog'] = blog

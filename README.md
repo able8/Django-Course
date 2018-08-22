@@ -724,3 +724,9 @@ urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 from ckeditor_uploader.fields import RichTextUploadingField
 content = RichTextUploadingField()
 ```
+
+## 18.博客阅读简单计数
+
+- 简单计数处理
+    - Blog模型添加数字字段记录
+    - 每次打开链接，记录+1

@@ -751,3 +751,33 @@ return response
 - COOKIES 计数方法的缺点
     - 后台编辑博客可能影响计数，而且计数的更新也会更新了博客的时间
     - 功能单一，无法统计某一天的阅读量
+
+## 19.博客阅读计数优化
+
+- 添加新的计数模型，计数功能独立，减少对原博客的影响
+    - 计数字段  和  博客 通过 外键 关联
+
+```py
+class ReadNum(models.Model):
+    read_num = models.IntegerField(default=0)
+    blog = models.OneToOneField(Blog, on_delete=models.DO_NOTHING)
+    # 或者 blog = models.ForeignKey(Blog, on_delete=models.DO_NOTHING)
+
+@admin.register(ReadNum)
+class ReadNumAdmin(admin.ModelAdmin):
+    list_display = ('read_num', 'blog')
+
+if not request.COOKIES.get('blog_%s_readed' % blog_pk):
+    # blog.readed_num += 1
+    # blog.save()
+
+    if ReadNum.objects.filter(blog=blog):
+        # 存在记录
+        readnum = ReadNum.objects.get(blog=blog)
+    else:
+        # 不存在记录
+        readnum = ReadNum(blog=blog)
+    # 计数加1
+    readnum.read_num += 1
+    readnum.save()
+```

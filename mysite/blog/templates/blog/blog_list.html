@@ -91,7 +91,9 @@
                         <div class="panel-body">
                             <ul class="blog-types">
                                 {% for blog_type in blog_types %}
-                                <li><a href="{% url 'blogs_with_type' blog_type.pk %}">{{ blog_type.type_name }}</a>
+                                <li><a href="{% url 'blogs_with_type' blog_type.pk %}">{{ blog_type.type_name }}
+                                    ({{ blog_type.blog_count }})
+                                </a>
                                 </li>
                                 {% empty %}
                                 <li>暂无分类</li>

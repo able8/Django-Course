@@ -628,3 +628,21 @@ context['blog'] = blog
     - "month" returns a list of all distinct year/month values for the field.
     - `Blog.objects.dates('created_time', 'month', order='DESC')`
     - asc 按升序排列, desc 按降序排列
+
+## 16.统计分类博客的数量
+
+- 方法一，附加一个数量属性
+
+```python
+# 获取博客分类的对应博客数量
+blog_types = BlogType.objects.all()
+blog_types_list = []
+for blog_type in blog_types:
+    blog_type.blog_count = Blog.objects.filter(blog_type=blog_type).count()
+    blog_types_list.append(blog_type)
+
+# context['blog_types'] = BlogType.objects.all()
+context['blog_types'] = blog_types_list
+```
+
+- 方法二，使用annotate拓展查询字段，注释统计信息

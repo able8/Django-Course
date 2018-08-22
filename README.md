@@ -683,3 +683,44 @@ context['blog_dates'] = blog_dates_dict
     - 有持续更新维护
     - 可以查看源码
     - 可以上传图片
+- 安装django-ckeditor [链接](https://pypi.org/project/django-ckeditor/)
+    - `pip install django-ckeditor`
+    - 注册应用`ckeditor`
+    - 配置models, 把字段改成RichTextField
+    - 执行数据库迁移，进后台编辑博客就可以看到
+- 添加上传图片功能
+    - `pip install pillow`
+    - 注册应用`ckeditor_uploader`
+    - 配置setting, media路径
+    - 配置url
+    - 配置model，把字段改成RichTextUploadingField
+
+```py
+# media 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# 配置ckeditor
+CKEDITOR_UPLOAD_PATH = 'upload/'
+
+# urls.py
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+# from blog.views import blog_list
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('admin/', admin.site.urls),
+    path('ckeditor', include('ckeditor_uploader.urls')),
+    path('blog/', include('blog.urls')),
+]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# models
+from ckeditor_uploader.fields import RichTextUploadingField
+content = RichTextUploadingField()
+```

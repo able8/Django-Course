@@ -1,4 +1,4 @@
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.core.cache import cache
 from django.contrib.contenttypes.models import ContentType
 from read_statistics.utils import get_seven_days_read_data, get_today_hot_data, get_yesterday_hot_data, get_7_days_hot_data
@@ -26,4 +26,4 @@ def home(request):
     context['today_hot_data'] = today_hot_data
     context['yesterday_hot_data'] = yesterday_hot_data
     context['hot_data_for_7_days'] = hot_data_for_7_days
-    return render_to_response('home.html', context)
+    return render(request, 'home.html', context)

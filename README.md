@@ -152,7 +152,7 @@ article = get_object_or_404(Article, pk=article_id)
 context = {}
 context['article_obj'] = article
 # return render(request, 'article_detail.html', context)
-return render_to_response('article_detail.html', context) # 不需要request参数l
+return render(request, 'article_detail.html', context) # 不需要request参数l
 ```
 
 - 获取文章列表
@@ -165,7 +165,7 @@ def article_list(request):
     articles = Article.objects.all()
     context = {}
     context['articles'] = articles
-    return render_to_response('article_list.html', context)
+    return render(request, 'article_list.html', context)
 ```
 
 - 路由管理，总urls包含app的urls，总分结构，便于维护
@@ -742,7 +742,7 @@ if not request.COOKIES.get('blog_%s_readed' % blog_pk):
     blog.readed_num += 1
     blog.save()
 
-response = render_to_response('blog/blog_detail.html', context)
+response = render(request, 'blog/blog_detail.html', context)
 # response.set_cookie('blog_%s_readed' % blog_pk, 'true', max_age=60) # 60s 失效
 response.set_cookie('blog_%s_readed' % blog_pk, 'true') # 默认退出浏览器失效
 return response
@@ -907,7 +907,7 @@ def home(request):
     read_nums = get_seven_days_read_data(blog_content_type)
     context = {}
     context['read_nums'] = read_nums
-    return render_to_response('home.html', context)
+    return render(request, 'home.html', context)
 
 # shell 实践理解 Sum 和 aggregate
 >>> from django.db.models import Sum
@@ -1080,3 +1080,14 @@ class CommentAdmin(admin.ModelAdmin):
 python manage.py makemigrations
 python manage.py migrate
 ```
+
+- 评论需要用户登录
+    - 减少垃圾评论
+    - 但提高了评论门槛，可以使用第三方登录解决
+    - 还可以发送通知给用户
+
+- 如何判断用户是否登录
+    - `context['user'] = request.user # 获取用户信息`
+    - `render(request, 'blog/blog_detail.html', context)`
+    - 因为需要使用request，需要用`render` 代替 `render_to_response`
+    - 因为模版settings中预先引用了auth，直接传request，模版中可以使用用户`{{ user }}`

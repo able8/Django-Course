@@ -920,3 +920,72 @@ def home(request):
 - 使用图表显示数据
     - 后台 + 前端： 后台提供数据，前台使用数据
     - [1 分钟上手 Highcharts](https://www.hcharts.cn/docs/start-helloworld)
+
+## 21.热门阅读博客排行及缓存提速
+
+
+进一步使用阅读量的数据，得到热门博客并将其显示在首页。而获取热门数据可能计算需要一点时间（如果很复杂很多的话），使用服务器缓存保存数据，达到提速的效果
+
+- 利用阅读量数据，得到热门博客并将其显示在首页
+    - 24小时内 今天数据统计
+    - 昨天数据统计
+    - 一周数据统计
+    - 一月数据统计
+
+```py
+# 获取今日热门文章
+def get_today_hot_data(content_type):
+    today = timezone.now().date()
+    read_details = ReadDetail.objects.filter(
+        content_type=content_type, date=today).order_by('-read_num')
+    return read_details[:7] # 取前7条
+
+
+# 获取昨天热门文章
+def get_yesterday_hot_data(content_type):
+    today = timezone.now().date()
+    yesterday = today - datetime.timedelta(days=1)
+    read_details = ReadDetail.objects.filter(
+        content_type=content_type, date=yesterday).order_by('-read_num')
+    return read_details[:7]
+
+# 获取7天热门文章
+def get_7_days_hot_data(content_type):
+    today = timezone.now().date()
+    date = today - datetime.timedelta(days=7)
+    blogs = Blog.objects\
+        .filter(read_details__date__lt=today, read_details__date__gte=date)\
+        .values('id', 'title')\
+        .annotate(read_num_sum=Sum('read_details__read_num'))\
+        .order_by('-read_num_sum')
+    return blogs[:7]
+
+```
+
+```py
+# 数据分组 聚合 查询 实践  GenericRelation
+
+from django.contrib.contenttypes.fields import GenericRelation
+class Blog(models.Model, ReadNumExpandMethod):
+    read_details = GenericRelation(ReadDetail)
+
+>>> from blog.models import Blog
+>>> blog = Blog.objects.first()
+>>> blog
+<Blog: <Blog: 第一篇博客 随笔>>
+>>> blog.read_details.all()
+<QuerySet [<ReadDetail: ReadDetail object (4)>]>
+>>> import datetime
+>>> from django.utils import timezone
+>>> toda = timezone.now().date()
+>>> today = timezone.now().date()
+>>> date = today - datetime.timedelta(days=7)
+>>> Blog.objects.filter(read_details__date__lt=today, read_details__date__gte=date)
+<QuerySet [<Blog: <Blog: 第一篇博客 随笔>>, <Blog: <Blog: 第2篇博客 随笔>>]>
+>>> blogs = Blog.objects.filter(read_details__date__lt=today, read_details__date__gte=date)
+>>> blogs.values('id', 'title')
+<QuerySet [{'id': 1, 'title': '第一篇博客 随笔'}, {'id': 2, 'title': '第2篇博客 随笔'}]>
+>>> from django.db.models import Sum
+>>> blogs.values('id', 'title').annotate(read_num_sum=Sum('read_details__read_num')).order_by('-read_num_sum')
+<QuerySet [{'id': 2, 'title': '第2篇博客 随笔', 'read_num_sum': 20}, {'id': 1, 'title': '第一篇博客 随笔', 'read_num_sum': 7}]>
+```

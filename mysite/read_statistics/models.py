@@ -22,6 +22,7 @@ class ReadNumExpandMethod():
         except exceptions.ObjectDoesNotExist:
             return 0
 
+
 class ReadDetail(models.Model):
     date = models.DateField(default=timezone.now)
     read_num = models.IntegerField(default=0)

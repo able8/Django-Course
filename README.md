@@ -876,3 +876,13 @@ else:
 readDetail.read_num += 1
 readDetail.save() 
 ```
+
+- 简化代码，使用 [.objects.get_or_create](https://docs.djangoproject.com/en/2.0/ref/models/querysets/)
+
+```py
+# 每天阅读量 + 1
+date = timezone.now().date()
+readDetail, created = ReadDetail.objects.get_or_create(content_type=ct, object_id=obj.pk, date=date)
+readDetail.read_num += 1
+readDetail.save()
+```

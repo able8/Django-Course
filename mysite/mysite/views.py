@@ -31,6 +31,7 @@ def home(request):
     return render(request, 'home.html', context)
 
 def login(request):
+    '''
     username = request.POST.get('username', '')
     password = request.POST.get('password', '')
     user = auth.authenticate(request, username=username, password=password)
@@ -41,3 +42,5 @@ def login(request):
         return redirect(referer)
     else:
         return render(request, 'error.html', {'message': '用户名或密码错误'})
+    '''
+    return render(request, 'login.html', {})

@@ -1203,3 +1203,11 @@ def blog_detail(request, blog_pk):
     response.set_cookie(read_cookie_key, 'true') # 阅读cookie标记
     return response
 ```
+
+## 24.使用Django Form表单
+
+- Django 用 Form 类描述 html 表单，简化操作，方便快速开发
+    - 接受和处理用户提交的数据
+    - 可以检查提交的数据，将数据类型转换成python的数据类型
+    - 可自动生成html代码
+

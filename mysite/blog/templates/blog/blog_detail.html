@@ -53,14 +53,7 @@
                 </form>
             {% else %}
                 未登录，登录后方可评论
-                <form action="{% url 'login' %}" method="POST">
-                    {% csrf_token %}
-                    <span>用户名：</span>
-                    <input type="text" name="username">
-                    <span>密码：</span>
-                    <input type="password" name="password">
-                    <input type="submit" value="登录">
-                </form>
+                <a href="{% url 'login' %}">登录</a>
             {% endif %}
             </div>
             <div class="comment-area">

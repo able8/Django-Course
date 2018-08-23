@@ -1267,3 +1267,38 @@ def login(request):
 # 拿到路径，如果没有就跳转首页
 redirect(request.GET.get('from', reverse('home'))) # 没有就跳转首页
 ```
+
+- 优化自定义表单，添加验证数据方法，让调用时的代码清晰明了
+
+```py
+class LoginForm(forms.Form):
+    username = forms.CharField(label='用户名', required=True) # 默认为True
+    password = forms.CharField(label='密码', widget=forms.PasswordInput)
+
+    # 验证数据方法
+    def clean(self):
+        username = self.cleaned_data['username']
+        password = self.cleaned_data['password']
+        user = auth.authenticate(username=username, password=password)
+        if user is None:
+            raise forms.ValidationError('用户名或密码错误')
+        elif:
+            self.cleaned_data['user'] = user
+        return self.cleaned_data
+
+# 优化后的调用
+def login(request):
+    if request.method == 'POST':
+        login_form = LoginForm(request.POST)
+        if login_form.is_valid():
+            user = login_form.cleaned_data['user']
+            auth.login(request, user)
+            return redirect(request.GET.get('from', reverse('home')))
+    else:
+        # get 加载页面
+        login_form = LoginForm() # 实例化表单
+
+    context = {}
+    context['login_form'] = login_form
+    return render(request, 'login.html', context)
+```

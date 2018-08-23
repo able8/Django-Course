@@ -12,7 +12,7 @@ def home(request):
     dates, read_nums = get_seven_days_read_data(blog_content_type)
     today_hot_data = get_today_hot_data(blog_content_type)
     yesterday_hot_data = get_yesterday_hot_data(blog_content_type)
-    
+
     # 获取7天热门博客的缓存数据
     hot_data_for_7_days = cache.get('hot_data_for_7_days')
     if hot_data_for_7_days is None:
@@ -34,19 +34,13 @@ def login(request):
     if request.method == 'POST':
         login_form = LoginForm(request.POST)
         if login_form.is_valid():
-            # 验证通过
-            username = login_form.cleaned_data['username']
-            password = login_form.cleaned_data['password']
-            user = auth.authenticate(request, username=username, password=password)
-            if user is not None:
-                auth.login(request, user)
-                return redirect(request.GET.get('from', reverse('home'))) # 没有就跳转首页
-            else:
-                login_form.add_error(None, '用户名或密码错误') # 添加错误提示
+            user = login_form.cleaned_data['user']
+            auth.login(request, user)
+            return redirect(request.GET.get('from', reverse('home')))
     else:
         # get 加载页面
         login_form = LoginForm() # 实例化表单
-    
+
     context = {}
     context['login_form'] = login_form
     return render(request, 'login.html', context)

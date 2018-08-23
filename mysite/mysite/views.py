@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.core.cache import cache
+from django.contrib import auth
 from django.contrib.contenttypes.models import ContentType
 from read_statistics.utils import get_seven_days_read_data, get_today_hot_data, get_yesterday_hot_data, get_7_days_hot_data
 from blog.models import Blog
@@ -27,3 +28,13 @@ def home(request):
     context['yesterday_hot_data'] = yesterday_hot_data
     context['hot_data_for_7_days'] = hot_data_for_7_days
     return render(request, 'home.html', context)
+
+def login(request):
+    username = request.POST.get('username', '')
+    password = request.POST.get('password', '')
+    user = auth.authenticate(request, username=username, password=password)
+    if user is not None:
+        auth.login(request, user)
+        return redirect('/')
+    else:
+        return render(request, 'error.html', {'message': '用户名或密码错误'})

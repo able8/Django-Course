@@ -1091,3 +1091,30 @@ python manage.py migrate
     - `render(request, 'blog/blog_detail.html', context)`
     - 因为需要使用request，需要用`render` 代替 `render_to_response`
     - 因为模版settings中预先引用了auth，直接传request，模版中可以使用用户`{{ user }}`
+
+- [Authentication in Web requests](https://docs.djangoproject.com/en/2.0/topics/auth/default/)
+
+```py
+#If the current user has not logged in, this attribute will be set to an instance of AnonymousUser, otherwise it will be an instance of User.
+if request.user.is_authenticated:
+    # Do something for authenticated users.
+    ...
+else:
+    # Do something for anonymous users.
+    ...
+
+#This example shows how you might use both authenticate() and login():
+from django.contrib.auth import authenticate, login
+
+def my_view(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        # Redirect to a success page.
+        ...
+    else:
+        # Return an 'invalid login' error message.
+        ...
+```

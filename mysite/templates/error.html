@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block nav_home_active %}active{% endblock %}
+
+{% block title %}
+    我的网站|错误
+{% endblock title %}
+{% block header_extends %}
+    <link rel="stylesheet" href="{% static 'home.css' %}">
+    <script src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+{% endblock header_extends %}
+
+{% block content %}
+   {{ message }}
+{% endblock content %}

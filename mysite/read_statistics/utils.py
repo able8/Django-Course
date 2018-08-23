@@ -46,7 +46,7 @@ def get_today_hot_data(content_type):
     today = timezone.now().date()
     read_details = ReadDetail.objects.filter(
         content_type=content_type, date=today).order_by('-read_num')
-    return read_details[:7] # 取前7条
+    return read_details[:7]  # 取前7条
 
 
 # 获取昨天热门文章
@@ -56,6 +56,7 @@ def get_yesterday_hot_data(content_type):
     read_details = ReadDetail.objects.filter(
         content_type=content_type, date=yesterday).order_by('-read_num')
     return read_details[:7]
+
 
 # 获取7天热门文章
 def get_7_days_hot_data(content_type):

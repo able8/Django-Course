@@ -7,6 +7,11 @@ h3.home-content {
 
 div#container {
     margin: 0 auto;
-    height:400px;
+    height:200px;
     width: 600px;
+}
+
+div.hot-data {
+    text-align: center;
+    margin-top: 2em
 }

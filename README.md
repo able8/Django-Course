@@ -34,7 +34,7 @@ Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.
 ```sh
 mysite
     ├ mysite            Pyhton 包
-    │   └ - _init__.py  
+    │   └ - _init__.py
     │   └ - settings.py 全局设置文件
     │   └ - urls.py     全局路由控制
     │   └ - wsgi.py     服务器使用的wsgi部署文件
@@ -47,7 +47,7 @@ mysite
 - 执行数据库迁移，新建数据库 `python manage.py migrate`
 - 创建超级管理员用户`python manage.py createsuperuser`
 - 管理员页面 <http://127.0.0.1:8000/admin/>
-    
+
 ## 03.Django基本应用结构
 
 - 创建Django App `python manage.py startapp article`
@@ -199,9 +199,9 @@ class Article(models.Model):
     content = models.TextField()
 
     def __str__(self):
-       return '<Article: %s>' % self.title 
+       return '<Article: %s>' % self.title
 
-       
+
 # admin.py
 # Register your models here.
 @admin.register(Article) # 使用装饰器更方便醒目
@@ -226,7 +226,7 @@ class Article(models.Model):
     # created_time = models.DateTimeField(default=timezone.now)
     created_time = models.DateTimeField(auto_now_add=True)
     last_updated_time = models.DateTimeField(auto_now=True)
-    author = models.ForeignKey(User, on_delete=models.DO_NOTHING, default=1) 
+    author = models.ForeignKey(User, on_delete=models.DO_NOTHING, default=1)
     is_deleted = models.BooleanField(default=False)
     readed_num = models.IntegerField(default=0)
 
@@ -236,7 +236,7 @@ class ArticleAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'author','is_deleted', 'created_time', 'last_updated_time', 'content')
     # ordering = ('-id', )  倒序
     ordering = ('id', )
-    
+
 # 使用，过滤删除的  views.py
 def article_list(request):
     # articles = Article.objects.all()
@@ -288,7 +288,7 @@ def article_list(request):
         - MySQL
         - Linux
         - 网站部署
-        
+
 ## 07.构建个人博客网站
 
 - 网站的功能模块 即 Django App
@@ -352,7 +352,7 @@ class Blog(models.Model):
 
     def __str__(self):
         return '<Blog: %s>' % self.title
-        
+
 # admin.py
 from django.contrib import admin
 from .models import BlogType, Blog
@@ -360,11 +360,11 @@ from .models import BlogType, Blog
 @admin.register(BlogType)
 class BlogTypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'type_name')
-    
+
 @admin.register(Blog)
 class BlogAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'blog_type', 'author', 'created_time', 'last_updated_time')
-    ordering = ('id',)   
+    ordering = ('id',)
 ```
 
 ## 08.常用的模版标签和过滤器
@@ -377,7 +377,7 @@ class BlogAdmin(admin.ModelAdmin):
     - templates
 
 - 常用的模版标签
-    - 循环 for 
+    - 循环 for
     - 条件 if, ifequal, ifnoequal
     - 链接 url
     - 模版嵌套 block、extends、include
@@ -413,7 +413,7 @@ context['blogs_count'] = Blog.objects.all().count
 ## 10.使用CSS美化页面
 
 - 页面设计
-    - 导航栏：xxx的网站  首页 
+    - 导航栏：xxx的网站  首页
     - 主体内容
     - 尾注
 
@@ -437,7 +437,7 @@ context['blogs_count'] = Blog.objects.all().count
     - 易用性
     - 兼容性
     - 大小、效果和功能
-- Bootstrap 
+- Bootstrap
     - 文档齐全，使用简单
     - 兼容较多浏览器，非轻量级
     - 响应式布局、移动设备优先
@@ -463,7 +463,7 @@ context['blogs_count'] = Blog.objects.all().count
 ## 13.分页和shell命令行模式
 
 - 通过讲解分页功能进一步夯实基础，包括shell命令行模式、模型操作、模版标签、分页器、GET请求。
-- 为什么需要分页? 
+- 为什么需要分页?
     - 当博客文章数过多，全部加载过慢，就需要分页加载
 - shell 命令行模式快速学习实践，添加博客
     - `python manage.py shell`
@@ -541,7 +541,7 @@ blog.save()
 # 需要给模型添加 排序方式
     class Meta:
         ordering = ['-created_time']
-# 然后数据迁移       
+# 然后数据迁移
 python manage.py makemigrations
 python manage.py migrate
 
@@ -662,7 +662,7 @@ blog_dates = Blog.objects.dates('created_time', 'month', order='DESC')
 blog_dates_dict = {}
 for blog_date in blog_dates:
     blog_count = Blog.objects.filter(created_time__year=blog_date.year, created_time__month=blog_date.month).count()
-    blog_dates_dict[blog_date] = blog_count 
+    blog_dates_dict[blog_date] = blog_count
 
 context['blog_dates'] = blog_dates_dict
 ```
@@ -696,7 +696,7 @@ context['blog_dates'] = blog_dates_dict
     - 配置model，把字段改成RichTextUploadingField
 
 ```py
-# media 
+# media
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -874,7 +874,7 @@ else:
     readDetail = ReadDetail(content_type=ct, object_id=obj.pk, date=date)
 # 计数加1
 readDetail.read_num += 1
-readDetail.save() 
+readDetail.save()
 ```
 
 - 简化代码，使用 [.objects.get_or_create](https://docs.djangoproject.com/en/2.0/ref/models/querysets/)
@@ -922,7 +922,6 @@ def home(request):
     - [1 分钟上手 Highcharts](https://www.hcharts.cn/docs/start-helloworld)
 
 ## 21.热门阅读博客排行及缓存提速
-
 
 进一步使用阅读量的数据，得到热门博客并将其显示在首页。而获取热门数据可能计算需要一点时间（如果很复杂很多的话），使用服务器缓存保存数据，达到提速的效果
 
@@ -988,4 +987,45 @@ class Blog(models.Model, ReadNumExpandMethod):
 >>> from django.db.models import Sum
 >>> blogs.values('id', 'title').annotate(read_num_sum=Sum('read_details__read_num')).order_by('-read_num_sum')
 <QuerySet [{'id': 2, 'title': '第2篇博客 随笔', 'read_num_sum': 20}, {'id': 1, 'title': '第一篇博客 随笔', 'read_num_sum': 7}]>
+```
+
+- 每次计数统计数量，非常耗时
+    - 策略：缓存数据，不用每次都计算
+    - [Django’s cache framework](https://docs.djangoproject.com/en/2.0/topics/cache/)
+    - 内存缓存：Memcached, Redis
+    - 数据库缓存
+    - 文件缓存
+
+- 数据库缓存
+
+```py
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'my_cache_table',  # 缓存表名
+    }
+}
+# Creating the cache table
+python manage.py createcachetable
+
+#Basic usage¶
+#The basic interface is set(key, value, timeout) and get(key):
+
+from django.core.cache import cache
+>>> cache.set('my_key', 'hello, world!', 30)
+>>> cache.get('my_key')
+'hello, world!'
+```
+
+- 获取7天热门博客的缓存数据
+
+```py
+from django.core.cache import cache
+hot_data_for_7_days = cache.get('hot_data_for_7_days')
+if hot_data_for_7_days is None:
+    hot_data_for_7_days = get_7_days_hot_data(blog_content_type)
+    cache.set('hot_data_for_7_days', hot_data_for_7_days, 20)
+    print('calc')
+else:
+    print('use cache')
 ```

@@ -15,7 +15,8 @@
     <h3 class="home-content">欢迎访问我的网站，随便看看</h3>
     <!-- 图表容器 DOM -->
     <div id="container"></div>
-    <h3>今天热门点击</h3>
+<div class="hot-data">
+    <h3 class="hot_data_title">今天热门点击</h3>
     <ul>
         {% for hot_data in today_hot_data  %}
         <li><a href="{% url 'blog_detail' hot_data.content_object.pk %}">{{ hot_data.content_object.title }}</a>({{ hot_data.read_num }})</li>
@@ -23,7 +24,8 @@
         <li>今天暂时没有热门博客</li>
         {% endfor %}
     </ul>
-
+</div> 
+<div class="hot-data">
     <h3>昨天热门点击</h3>
     <ul>
         {% for hot_data in yesterday_hot_data  %}
@@ -32,7 +34,8 @@
         <li>昨天没有热门博客</li>
         {% endfor %}
     </ul>
-
+</div>
+<div class="hot-data">
     <h3>7天热门博客</h3>
     <ul>
         {% for hot_data in hot_data_for_7_days  %}
@@ -41,6 +44,7 @@
         <li>没有热门博客</li>
         {% endfor %}
     </ul>
+</div>
 
     <script>
         // 图表配置

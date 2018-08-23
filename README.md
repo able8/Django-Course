@@ -1211,3 +1211,59 @@ def blog_detail(request, blog_pk):
     - 可以检查提交的数据，将数据类型转换成python的数据类型
     - 可自动生成html代码
 
+- Django Form 的使用
+    - 创建 forms.py 文件
+    - 字段 就是 html input 标签
+    - 每个字段类型都有一个适当的默认Widget类
+
+```py
+# forms.py
+from django import forms
+from django.contrib import auth
+
+
+# 定制登录表单
+class LoginForm(forms.Form):
+    username = forms.CharField(label='用户名', required=True) # 默认为True
+    password = forms.CharField(label='密码', widget=forms.PasswordInput)
+
+# views.py
+def login(request):
+    if request.method == 'POST':
+        login_form = LoginForm(request.POST)
+        if login_form.is_valid():
+            # 验证通过
+            username = login_form.cleaned_data['username']
+            password = login_form.cleaned_data['password']
+            user = auth.authenticate(request, username=username, password=password)
+            if user is not None:
+                auth.login(request, user)
+                return redirect(request.GET.get('from', reverse('home'))) # 没有就跳转首页
+            else:
+                login_form.add_error(None, '用户名或密码错误') # 添加错误提示
+    else:
+        # get 加载页面
+        login_form = LoginForm() # 实例化表单
+    
+    context = {}
+    context['login_form'] = login_form
+    return render(request, 'login.html', context)
+
+# login.html
+<form action="" method="POST">
+    {% csrf_token %}
+    {{ login_form }}
+    <input type="submit" value="登录">
+</form>
+```
+
+- 如何获取用户登录前的页面，方便登录后返回
+
+```py
+# 登录时的页面，带着当时的路径
+未登录，登录后方可评论
+<a href="{% url 'login' %}?from={{ request.get_full_path }}">登录</a>
+
+# 拿到路径，如果没有就跳转首页
+redirect(request.GET.get('from', reverse('home'))) # 没有就跳转首页
+```

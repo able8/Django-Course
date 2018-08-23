@@ -12,12 +12,10 @@
 {% endblock header_extends %}
 
 {% block content %}
-    <form action="{% url 'login' %}" method="POST">
+    {% comment %} 链接指向自己的可以用#号  <form action="{% url 'login' %}" method="POST"> {% endcomment %}
+    <form action="" method="POST">
         {% csrf_token %}
-        <span>用户名：</span>
-        <input type="text" name="username">
-        <span>密码：</span>
-        <input type="password" name="password">
+        {{ login_form }}
         <input type="submit" value="登录">
     </form>
 {% endblock content %}

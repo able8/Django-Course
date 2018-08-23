@@ -1203,4 +1203,3 @@ def blog_detail(request, blog_pk):
     response.set_cookie(read_cookie_key, 'true') # 阅读cookie标记
     return response
 ```
-

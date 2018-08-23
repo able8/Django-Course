@@ -65,6 +65,15 @@
             </div>
             <div class="comment-area">
                 <h3 class="comment-area-title">评论列表</h3>
+                {% for comment in comments  %}
+                    <div>
+                        {{ comment.user.username }}
+                        {{ comment.comment_time | date:"Y-m-d H:i:s" }} :
+                        {{ comment.text }}
+                    </div>
+                {% empty %}
+                    暂无评论
+                {% endfor %}
         </div>
     </div>
 </div

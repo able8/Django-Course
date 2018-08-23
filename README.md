@@ -1121,3 +1121,86 @@ def my_view(request):
 
 ## 23.html表单提交评论
 
+- 获取请求时网址，登录成功后返回原页面
+
+```py
+from django.urls import reverse
+
+# referer = request.META.get('HTTP_REFERER', '/') # 获取请求时网址，登录成功后返回
+referer = request.META.get('HTTP_REFERER', reverse('home')) #别名找到链接
+if user is not None:
+    auth.login(request, user)
+    return redirect(referer)
+else:
+    return render(request, 'error.html', {'message': '用户名或密码错误'})
+```
+
+- 处理用户提交的评论
+  
+```py
+def update_comment(request):
+    referer = request.META.get('HTTP_REFERER', reverse('home'))
+
+    # 数据检查
+    if not request.user.is_authenticated:
+        return render(request, 'error.html', {'message': '请先登录', 'redirect_to': referer})
+
+    text = request.POST.get('text', '').strip() # 多个空格也是空内容
+    if text == '':
+        return render(request, 'error.html', {'message': '评论内容不能为空', 'redirect_to': referer})
+
+    try:
+        content_type = request.POST.get('content_type', '')
+        object_id = int(request.POST.get('object_id', ''))
+        model_class = ContentType.objects.get(model=content_type).model_class()
+        model_obj = model_class.objects.get(pk=object_id)
+    except Exception as e:
+        return render(request, 'error.html', {'message': '评论对象不存在', 'redirect_to': referer})
+
+    # 通过则保存数据
+    comment = Comment()
+    comment.user = user
+    comment.text = text
+    comment.content_object = model_obj
+    comment.save()
+    return redirect(referer)  # 提交后重定向到原页面
+```
+
+- 评论列表时间逆序显示, 最新的在最前面
+    - 修改完不需要数据迁移，直接生效
+
+```py
+class Comment(models.Model):
+    # 下面3行用来关联任意类型
+    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    text = models.TextField()
+    comment_time = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+
+    class Meta:
+        ordering = ['-comment_time'] # 时间逆序，最新的在最前面
+```
+
+- 获取评论列表
+
+```py
+def blog_detail(request, blog_pk):
+    blog = get_object_or_404(Blog, pk=blog_pk)
+    read_cookie_key = read_statistics_one_read(request, blog)
+
+    blog_content_type = ContentType.objects.get_for_model(blog)
+    comments = Comment.objects.filter(content_type=blog_content_type, object_id=blog.pk)
+    
+    context = {}
+    context['comments'] = comments
+    context['previous_blog'] = Blog.objects.filter(created_time__gt=blog.created_time).last()
+    context['next_blog'] = Blog.objects.filter(created_time__lt=blog.created_time).first()
+    context['blog'] = blog
+    response = render(request, 'blog/blog_detail.html', context)
+    response.set_cookie(read_cookie_key, 'true') # 阅读cookie标记
+    return response
+```
+

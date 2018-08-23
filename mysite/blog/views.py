@@ -2,8 +2,10 @@ from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.db.models import Count
+from django.contrib.contenttypes.models import ContentType
 from .models import Blog, BlogType
 from read_statistics.utils import read_statistics_one_read
+from comment.models import Comment
 
 
 def get_blog_list_common_date(request, blogs_all_list):
@@ -77,7 +79,11 @@ def blog_detail(request, blog_pk):
     blog = get_object_or_404(Blog, pk=blog_pk)
     read_cookie_key = read_statistics_one_read(request, blog)
 
+    blog_content_type = ContentType.objects.get_for_model(blog)
+    comments = Comment.objects.filter(content_type=blog_content_type, object_id=blog.pk)
+    
     context = {}
+    context['comments'] = comments
     context['previous_blog'] = Blog.objects.filter(created_time__gt=blog.created_time).last()
     context['next_blog'] = Blog.objects.filter(created_time__lt=blog.created_time).first()
     context['blog'] = blog

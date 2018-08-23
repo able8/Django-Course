@@ -846,3 +846,33 @@ class ReadNumAdmin(admin.ModelAdmin):
 ```
 
 - 最后，拆分优化，重新封装公共应用，抽出公用的方法
+
+## 20.阅读计数统计和显示
+
+- 添加统计每天的阅读量
+
+```py
+class ReadDetail(models.Model):
+    date = models.DateField(default=timezone.now)
+    read_num = models.IntegerField(default=0)
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+@admin.register(ReadDetail)
+class ReadDetailAdmin(admin.ModelAdmin):
+    list_display = ('date', 'read_num', 'content_object')
+
+# 每天阅读量 + 1
+date = timezone.now().date()
+if ReadDetail.objects.filter(content_type=ct, object_id=obj.pk, date=date).count():
+    # 存在记录
+    readDetail = ReadDetail.objects.get(content_type=ct, object_id=obj.pk, date=date)
+else:
+    # 不存在记录
+    readDetail = ReadDetail(content_type=ct, object_id=obj.pk, date=date)
+# 计数加1
+readDetail.read_num += 1
+readDetail.save() 
+```

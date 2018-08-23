@@ -916,3 +916,7 @@ def home(request):
 >>> rds.aggregate(read_num_sum=Sum('read_num')) # 返回结果的dict
 {'read_num_sum': 8}
 ```
+
+- 使用图表显示数据
+    - 后台 + 前端： 后台提供数据，前台使用数据
+    - [1 分钟上手 Highcharts](https://www.hcharts.cn/docs/start-helloworld)

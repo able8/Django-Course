@@ -1,7 +1,12 @@
 h3.home-content {
     font-size: 2em;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    text-align: center;
+    margin-top: 4em;
+    margin-bottom: 2em;
+}
+
+div#container {
+    margin: 0 auto;
+    height:400px;
+    width: 600px;
 }

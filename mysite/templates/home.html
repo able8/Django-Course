@@ -8,9 +8,47 @@
 {% endblock title %}
 {% block header_extends %}
     <link rel="stylesheet" href="{% static 'home.css' %}">
+    <script src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
 {% endblock header_extends %}
 
 {% block content %}
     <h3 class="home-content">欢迎访问我的网站，随便看看</h3>
-    <p>{{ read_nums }}</p>
+    <!-- 图表容器 DOM -->
+    <div id="container"></div>
+    <script>
+        // 图表配置
+        var options = {
+            chart: {
+                type: 'line'                          //指定图表的类型，默认是折线图（line）
+            },
+            title: {
+                text: null                 // 标题
+            },
+            xAxis: {
+                categories: {{ dates|safe }},  // x 轴分类
+                tickmarkPlacement: 'on',
+            },
+            yAxis: {
+                title: {
+                    text: null               // y 轴标题
+                },
+                labels: { enabled: false},
+                gridLineDashStyle: 'Dash',
+            },
+            series: [{                              // 数据列
+                name: '阅读量',                        // 数据列名
+                data: {{ read_nums }},                  // 数据
+            }],
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true
+                    }
+                }
+            },
+            credits: { enabled: false},
+        };
+        // 图表初始化函数
+        var chart = Highcharts.chart('container', options);
+    </script>
 {% endblock content %}

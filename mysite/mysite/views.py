@@ -6,7 +6,8 @@ from blog.models import Blog
 
 def home(request):
     blog_content_type = ContentType.objects.get_for_model(Blog)
-    read_nums = get_seven_days_read_data(blog_content_type)
+    dates, read_nums = get_seven_days_read_data(blog_content_type)
     context = {}
+    context['dates'] = dates
     context['read_nums'] = read_nums
     return render_to_response('home.html', context)

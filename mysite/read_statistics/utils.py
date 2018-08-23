@@ -28,11 +28,13 @@ def read_statistics_one_read(request, obj):
 # 统计最近7天阅读量
 def get_seven_days_read_data(content_type):
     today = timezone.now().date()
+    dates = []
     read_nums = []
     for i in range(6, -1, -1):
         date = today - datetime.timedelta(days=i)
+        dates.append(date.strftime('%m/%d'))
         read_details = ReadDetail.objects.filter(
             content_type=content_type, date=date)
         result = read_details.aggregate(read_num_sum=Sum('read_num'))  # 聚合
         read_nums.append(result['read_num_sum'] or 0) # 空则为0
-    return read_nums
+    return dates, read_nums

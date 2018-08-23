@@ -886,3 +886,33 @@ readDetail, created = ReadDetail.objects.get_or_create(content_type=ct, object_i
 readDetail.read_num += 1
 readDetail.save()
 ```
+
+- 统计最近7天的阅读量
+
+```py
+# 统计最近7天阅读量
+def get_seven_days_read_data(content_type):
+    today = timezone.now().date()
+    read_nums = []
+    for i in range(6, -1, -1):
+        date = today - datetime.timedelta(days=i)
+        read_details = ReadDetail.objects.filter(
+            content_type=content_type, date=date)
+        result = read_details.aggregate(read_num_sum=Sum('read_num'))  # 聚合
+        read_nums.append(result['read_num_sum'] or 0) # 空则为0
+    return read_nums
+
+def home(request):
+    blog_content_type = ContentType.objects.get_for_model(Blog)
+    read_nums = get_seven_days_read_data(blog_content_type)
+    context = {}
+    context['read_nums'] = read_nums
+    return render_to_response('home.html', context)
+
+# shell 实践理解 Sum 和 aggregate
+>>> from django.db.models import Sum
+>>> from read_statistics.models import ReadDetail
+>>> rds = ReadDetail.objects.all()
+>>> rds.aggregate(read_num_sum=Sum('read_num')) # 返回结果的dict
+{'read_num_sum': 8}
+```

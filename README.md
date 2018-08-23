@@ -1118,3 +1118,6 @@ def my_view(request):
         # Return an 'invalid login' error message.
         ...
 ```
+
+## 23.html表单提交评论
+

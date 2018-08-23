@@ -4,6 +4,7 @@ from django.contrib import auth
 from django.contrib.contenttypes.models import ContentType
 from read_statistics.utils import get_seven_days_read_data, get_today_hot_data, get_yesterday_hot_data, get_7_days_hot_data
 from blog.models import Blog
+from django.urls import reverse
 
 
 def home(request):
@@ -33,8 +34,10 @@ def login(request):
     username = request.POST.get('username', '')
     password = request.POST.get('password', '')
     user = auth.authenticate(request, username=username, password=password)
+    # referer = request.META.get('HTTP_REFERER', '/') # 获取请求时网址，登录成功后返回
+    referer = request.META.get('HTTP_REFERER', reverse('home')) #别名找到链接
     if user is not None:
         auth.login(request, user)
-        return redirect('/')
+        return redirect(referer)
     else:
         return render(request, 'error.html', {'message': '用户名或密码错误'})

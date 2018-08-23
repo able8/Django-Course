@@ -1029,3 +1029,54 @@ if hot_data_for_7_days is None:
 else:
     print('use cache')
 ```
+
+## 22.评论功能设计和用户登录
+
+- 主要设计评论模型、用户登录、简单form表单提交以及更正之前的render_to_response为render
+
+- 实现评论功能的方式
+    - 第三方评论插件，如友言，多说，Disqus，网易更贴
+    - Django 评论库，django-comment
+    - 自己写代码实现
+
+- 创建评论模型
+    - 评论对象
+    - 评论者
+    - 评论内容
+    - 评论时间
+
+- 实现过程
+    - 创建应用`python manage.py startapp comment`
+    - 创建数据的模型models
+    - 注册后台管理页面
+    - 注册app
+    - 迁移数据库
+
+```py
+# models
+from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User
+
+class Comment(models.Model):
+    # 下面3行用来关联任意类型
+    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    text = models.TextField()
+    comment_time = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+
+# admin
+from django.contrib import admin
+from .models import Comment
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('content_object', 'text', 'comment_time', 'user')
+
+python manage.py makemigrations
+python manage.py migrate
+```

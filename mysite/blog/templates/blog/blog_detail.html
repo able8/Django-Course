@@ -44,12 +44,17 @@
             {% if user.is_authenticated %}
                 <form action="{% url 'update_comment' %}" method="POST" style="overflow: hidden">
                     {% csrf_token %}
+                    <label for="comment_text">{{ user.username }}，欢迎评论～</label>
+                    {{ comment_form }}
+                    <input type="submit" value="评论" class="btn btn-primary" style="float:right">
+
+                    {% comment %} 
                     <div class="form-group">
                         <label for="comment_text">{{ user.username }}，欢迎评论～</label>
                         <textarea name="text" id="comment_text" cols="80" rows="4" class="form-control">                       </textarea></div>
                     <input type="hidden" name="object_id" value="{{ blog.pk }}">
                     <input type="hidden" name="content_type" value="blog">
-                    <input type="submit" value="评论" class="btn btn-primary" style="float:right">
+                    <input type="submit" value="评论" class="btn btn-primary" style="float:right"> {% endcomment %}
                 </form>
             {% else %}
                 未登录，登录后方可评论

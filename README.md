@@ -1452,3 +1452,72 @@ def register(request):
     context['reg_form'] = reg_form
     return render(request, 'register.html', context)
 ```
+
+## 25.表单富文本编辑和ajax异步提交评论
+
+- django-ckeditor 富文本表单
+    - 每个字段类型都有一个适当的默认Widget类
+    - django-ckeditor 提供 widget
+    - `from ckeditor.widget import CKEditorWidget`
+
+- 将评论表单独立出来，放在评论应用里，定制评论表单类，添加验证表单逻辑
+
+```py
+# comment/forms.py
+from django import forms
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import ObjectDoesNotExist
+
+class CommentForm(forms.Form):
+    content_type = forms.CharField(widget=forms.HiddenInput)
+    object_id = forms.IntegerField(widget=forms.HiddenInput)
+    text = forms.CharField(widget=forms.Textarea)
+
+    def __init__(self, *args, **kwargs):
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')  # 接收用户信息, 并剔除，为了下一句不出错
+        super(CommentForm, self).__init__(*args, **kwargs)
+
+    # 验证数据
+    def clean(self):
+        # 判断用户是否登录
+        if self.user.is_authenticated:
+            self.cleaned_data['user'] = self.user
+        else:
+            raise forms.ValidationError('用户尚未登录')
+
+        # 评论对象验证
+        content_type = self.cleaned_data['content_type']
+        object_id = self.cleaned_data['object_id']
+        try:
+            model_class = ContentType.objects.get(model=content_type).model_class()
+            model_obj = model_class.objects.get(pk=object_id)
+            self.cleaned_data['content_object'] = model_obj
+        except ObjectDoesNotExist:
+            raise forms.ValidationError('评论对象不存在')
+
+        return self.cleaned_data
+
+# 提交
+<form action="{% url 'update_comment' %}" method="POST" style="overflow: hidden">
+    {% csrf_token %}
+    <label for="comment_text">{{ user.username }}，欢迎评论～</label>
+    {{ comment_form }}
+    <input type="submit" value="评论" class="btn btn-primary" style="float:right">
+</form>
+
+# 处理逻辑
+def update_comment(request):
+    referer = request.META.get('HTTP_REFERER', reverse('home'))
+    comment_form = CommentForm(request.POST, user=request.user) # 实例化, 传递了用户信息，直接有表单类验证登录
+    if comment_form.is_valid():
+        # 通过则保存数据
+        comment = Comment()
+        comment.user = comment_form.cleaned_data['user']
+        comment.text = comment_form.cleaned_data['text']
+        comment.content_object = comment_form.cleaned_data['content_object']
+        comment.save()
+        return redirect(referer)  # 提交后重定向到原页面
+    else:
+        return render(request, 'error.html', {'message': comment_form.errors, 'redirect_to': referer})
+```

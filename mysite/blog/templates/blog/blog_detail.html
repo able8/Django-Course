@@ -46,6 +46,10 @@
             {% if user.is_authenticated %}
                 <form id="comment_form" action="{% url 'update_comment' %}" method="POST" style="overflow: hidden">
                     <label>{{ user.username }}，欢迎评论～</label>
+                    <div id="reply_content_container" style="display: none;">
+                        <p>回复：</p>
+                        <div id="reply_content"> </div>
+                    </div>
                     {% csrf_token %}
                     {% for field in comment_form %}
                         {{ field }}
@@ -64,15 +68,32 @@
                 <h3 class="comment-area-title">评论列表</h3>
                 <div id="comment_list" >
                     {% for comment in comments  %}
-                        <div>
-                            {{ comment.user.username }}
-                            ({{ comment.comment_time | date:"Y-m-d H:i:s" }}):
-                            {{ comment.text | safe }}  {# html标记转成对应格式 #}
+                        <div id="root_{{ comment.pk }}" class="comment">
+                            <span>{{ comment.user.username }}
+                            <span>({{ comment.comment_time | date:"Y-m-d H:i:s" }}):</span>
+                            <div id="comment_{{ comment.pk }}">
+                                {{ comment.text | safe }}
+                            </div>
+                            <a href="javascript:reply({{ comment.pk }})">回复</a>
+                           
+                            {% for reply in comment.root_comment.all  %}
+                                <div class="reply">
+                                    <span>{{ reply.user.username }}</span>
+                                    <span>({{ reply.comment_time | date:"Y-m-d H:i:s" }}):</span>
+                                    <span>回复</span>
+                                    <span>{{ reply.reply_to.username }}</span>
+                                    <div id="comment_{{ reply.pk }}">
+                                        {{ reply.text|safe }}
+                                    </div>
+                                    <a href="javascript:reply({{ reply.pk }})">回复</a>
+                                </div>
+                            {% endfor %}
                         </div>
                     {% empty %}
                         <span id='no_comment'>暂无评论</span>
                     {% endfor %}
                 </div>
+            </div>
         </div>
     </div>
 </div>
@@ -82,7 +103,7 @@
 {% block script_extends %}
 <script type="text/javascript">
     $('#comment_form').submit(function(){
-        
+
         // 判断评论内容是否为空  包括空的换行
         $("#comment_error").text('');
         if(CKEDITOR.instances['id_text'].document.getBody().getText().trim() == ''){
@@ -101,14 +122,37 @@
             cache: false,
             success: function(data){    // 提交成功后调用的方法
                 console.log(data);
-                // 如果成功，就插入显示数据
-                $("#no_comment").remove();
+                // 如果成功，就插入显示数
+                
                 if(data['status']=='SUCCESS'){
-                    var comment_html = '<div>' + data['username'] +
-                          ' (' + data['comment_time'] + '): ' + data['text'] + '</div>';
-                    $("#comment_list").prepend(comment_html);
+                    // 判断是 评论 还是 回复， 不同的插入位置的
+                    if($('#reply_comment_id').val() == '0'){
+                    // 插入评论
+                    var comment_html = '<div id="root_' + data['pk'] + '" class="comment"> \
+                    <span>' + data['username'] + '</span> \
+                    <span>(' + data['comment_time'] + '):</span>\
+                    <div id="comment_' + data['pk'] + '">' + data['text'] + '</div> \
+                    <a href="javascript:reply(' + data['pk'] + ');">回复</a></div>';
+                    $('#comment_list').prepend(comment_html);
+
+                    }else{
+                    // 插入回复
+                    var reply_html = '<div class="reply"><span>' + data['username'] + '</span> \
+                    <span>(' + data['comment_time'] + '):</span> \
+                    <span> 回复 </span> \
+                    <span>' + data['reply_to'] + ': </span> \
+                    <div id="comment_' + data['pk'] + '">' + data['text'] + '</div> \
+                    <a href="javascript:reply(' + data['pk'] + ');">回复</a></div>';
+                    $('#root_' + data['root_pk']).append(reply_html);
+
+                    }
+                    
                     // 清空评论区内容
                     CKEDITOR.instances['id_text'].setData('');  
+                    $('#reply_content_container').hide();
+                    $('#reply_comment_id').val('0');
+                    $("#no_comment").remove();
+
                 }else{
                     // 显示错误信息
                     $("#comment_error").text(data['message']);
@@ -120,5 +164,19 @@
         });
         return false;
     });
+
+    function reply(reply_comment_id){
+        // 设置值
+        $('#reply_comment_id').val(reply_comment_id);
+        // 显示回复的哪条
+        var html = $('#comment_' + reply_comment_id).html();
+        $('#reply_content').html(html);
+        $('#reply_content_container').show();
+        // 点击回复后，屏幕滚动到评论表单, 并获得焦点,
+        $('html').animate({scrollTop: $('#comment_form').offset().top - 60 }, 300, function(){
+            CKEDITOR.instances['id_text'].focus();
+        });
+    }
+
 </script>
 {% endblock script_extends %}

@@ -1302,3 +1302,70 @@ def login(request):
     context['login_form'] = login_form
     return render(request, 'login.html', context)
 ```
+
+- Python内建的filter()函数用于过滤序列, 过滤出需要的属性或方法
+    - filter()接收一个函数和一个序列，把传入的函数依次作用于每个元素，然后根据返回值是True则保留
+    - filter()函数返回的是一个Iterator
+
+```py
+>>> from django import forms
+>>> filter(lambda x: 'Input' in x,     dir(forms))
+<filter object at 0x10304ea58>
+>>> list(filter(lambda x: 'Input' in x, dir(forms)))
+['CheckboxInput', 'ClearableFileInput', 'DateInput', 'DateTimeInput', 'EmailInput', 'FileInput', 'HiddenInput', 'MultipleHiddenInput', 'NumberInput', 'PasswordInput', 'TextInput', 'TimeInput', 'URLInput']
+>>>
+>>> filter(lambda x: 'Field' in x,     dir(forms))
+<filter object at 0x10304e908>
+>>> list(filter(lambda x: 'Field' in x,     dir(forms)))
+['BooleanField', 'BoundField', 'CharField', 'ChoiceField', 'ComboField', 'DateField', 'DateTimeField', 'DecimalField', 'DurationField', 'EmailField', 'Field', 'FileField', 'FilePathField', 'FloatField', 'GenericIPAddressField', 'ImageField', 'IntegerField', 'ModelChoiceField', 'ModelMultipleChoiceField', 'MultiValueField', 'MultipleChoiceField', 'NullBooleanField', 'RegexField', 'SlugField', 'SplitDateTimeField', 'TimeField', 'TypedChoiceField', 'TypedMultipleChoiceField', 'URLField', 'UUIDField']
+```
+
+- 使用forms和bootstrap定制优化登录表单显示
+    - [bootstrap 输入框组](https://v3.bootcss.com/components/#input-groups)
+    - [面版](https://v3.bootcss.com/components/#panels)
+
+```py
+# 定制登录表单显示
+class LoginForm(forms.Form):
+    username = forms.CharField(label='用户名',
+                        required=True, # 默认为True
+                        widget=forms.TextInput(attrs={'class': 'form-control',
+                            'placeholder':'请输入用户名'}))
+                        # 设置渲染后的html的属性
+                        
+    password = forms.CharField(label='密码',
+                        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder':'请输入密码'}))
+
+```
+
+```js
+<div class="containter">
+    <div class="row">
+        <div class="col-xs-4 col-xs-offset-4">
+    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">登录</h3>
+                </div>
+                <div class="panel-body">
+                    <form action="" method="POST">
+                        {% csrf_token %}
+                        {% comment %} {{ login_form }} 定制显示 {% endcomment %}
+                        {% for field in login_form %}
+                            <label for="field.id_for_label">{{ field.label }}</label>
+                            {{ field }}
+                            <p class="text-danger">
+                                {{ field.errors.as_text }}
+                            </p>
+                        {% endfor %}
+                        <span class="pull-left text-danger">{{ login_form.non_field_errors }}</span>
+                        <input type="submit" value="登录" class="btn btn-primary pull-right">
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+```

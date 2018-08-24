@@ -3,6 +3,7 @@
 Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.com/252028233/>
 
 看视频整理要点笔记:
+
 - [Django_Course](#djangocourse)
     - [01.什么是Django](#01%E4%BB%80%E4%B9%88%E6%98%AFdjango)
         - [1. 什么是Django](#1-%E4%BB%80%E4%B9%88%E6%98%AFdjango)
@@ -1166,7 +1167,7 @@ else:
 ```
 
 - 处理用户提交的评论
-  
+
 ```py
 def update_comment(request):
     referer = request.META.get('HTTP_REFERER', reverse('home'))
@@ -1441,6 +1442,7 @@ class RegForm(forms.Form):
 ```
 
 - 优化前端 登录 或 注册 按钮
+
 ```js
 未登录，登录后方可评论
 <a class="btn btn-primary" href="{% url 'login' %}?from={{ request.get_full_path }}">登录</a>
@@ -1591,3 +1593,96 @@ div.django-ckeditor-widget {
 ```
 
 ![富文本表单](images/富文本表单.png)
+
+- ajax 异步提交数据方式：[jQuery - AJAX 简介](http://www.w3school.com.cn/jquery/jquery_ajax_intro.asp)
+    - AJAX 是与服务器交换数据的艺术，它在不重载全部页面的情况下，实现了对部分网页的更新
+    - AJAX = 异步 JavaScript 和 XML（Asynchronous JavaScript and XML）
+    - 在不重载整个网页的情况下，AJAX 通过后台加载数据，并在网页上进行显示
+    - 使用 AJAX 的应用程序案例：谷歌地图、腾讯微博、优酷视频 等等
+    - 序列化表单值 [jQuery ajax - serialize() 方法](http://www.w3school.com.cn/jquery/ajax_serialize.asp)
+
+- ajax请求
+
+```js
+{# ajax 异步提交, 因为直接提交会刷新页面 #}
+{% block script_extends %}
+<script type="text/javascript">
+    $('#comment_form').submit(function(){
+        // 判断评论内容是否为空  包括空的换行
+        $("#comment_error").text('');
+        if(CKEDITOR.instances['id_text'].document.getBody().getText().trim() == ''){
+            $("#comment_error").text('评论内容为空');
+            return false;
+        }
+        // 更新数据到textarea里面
+        CKEDITOR.instances['id_text'].updateElement();
+        // 异步提交
+        $.ajax({
+            url: "{% url 'update_comment' %}",
+            type: 'POST',
+            data: $(this).serialize(),   // this 即 #comment_form
+            cache: false,
+            success: function(data){    // 提交成功后调用的方法
+                console.log(data);
+                // 如果成功，就插入显示数据
+                $("#no_comment").remove();
+                if(data['status']=='SUCCESS'){
+                    var comment_html = '<div>' + data['username'] +
+                          ' (' + data['comment_time'] + '): ' + data['text'] + '</div>';
+                    $("#comment_list").prepend(comment_html);
+                    // 清空评论区内容
+                    CKEDITOR.instances['id_text'].setData('');  
+                }else{
+                    // 显示错误信息
+                    $("#comment_error").text(data['message']);
+                }
+            },
+            error: function(xhr){        // 提交异常时调用的方法
+                console.log(xhr);
+            }
+        });
+        return false;
+    });
+</script>
+{% endblock script_extends %}
+```
+
+- 处理ajax请求
+
+```py
+def update_comment(request):
+    # referer = request.META.get('HTTP_REFERER', reverse('home'))
+    comment_form = CommentForm(
+        request.POST, user=request.user)  # 实例化, 传递了用户信息，直接有表单类验证登录
+    data = {}
+    if comment_form.is_valid():
+        # 通过则保存数据
+        comment = Comment()
+        comment.user = comment_form.cleaned_data['user']
+        comment.text = comment_form.cleaned_data['text']
+        comment.content_object = comment_form.cleaned_data['content_object']
+        comment.save()
+        # 返回数据
+        data['status'] = 'SUCCESS'
+        data['username'] = comment.user.username
+        data['comment_time'] = comment.comment_time.strftime(
+            '%Y-%m-%d %H:%M:%S')
+        data['text'] = comment.text
+    else:
+        data['status'] = 'ERROR'
+        data['message'] = list(comment_form.errors.values())[0][0]
+    return JsonResponse(data)
+```
+
+- 自定义表单错误提示信息
+
+```py
+class CommentForm(forms.Form):
+    text = forms.CharField(
+        widget=CKEditorWidget(config_name='comment_ckeditor'),
+        error_messages={'required': '评论内容为空'})
+```
+
+- 怎么把“暂无评论”的字样去掉(°∀°)
+    - 可以把“暂无评论”改成`<span id="no_comment">暂无评论</span>`
+    - 然后在ajax提交成功之后移除该节点 $("#no_comment").remove()

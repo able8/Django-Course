@@ -36,10 +36,10 @@
         </div>
     </div>    
 
-        {% block content %}{% endblock content %}
-
     <script type="text/javascript" src="{% static 'jquery-1.12.4.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'bootstrap-3.3.7/js/bootstrap.min.js' %}"></script>
+    
+    {% block content %}{% endblock content %}
+    {% block script_extends %}{% endblock script_extends %}
 </body>
-
 </html>

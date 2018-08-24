@@ -44,13 +44,14 @@
             <div class="comment-area">
             <h3 class="comment-area-title">提交评论</h3>
             {% if user.is_authenticated %}
-                <form action="{% url 'update_comment' %}" method="POST" style="overflow: hidden">
+                <form id="comment_form" action="{% url 'update_comment' %}" method="POST" style="overflow: hidden">
                     <label>{{ user.username }}，欢迎评论～</label>
                     {% csrf_token %}
                     {% for field in comment_form %}
                         {{ field }}
                     {% endfor %}
-                    <input type="submit" value="评论" class="btn btn-primary" style="float:right">
+                    <span id="comment_error" class="text-danger pull-left"></span>
+                    <input type="submit" value="评论" class="btn btn-primary pull-right">
                 </form>
             {% else %}
                 未登录，登录后方可评论
@@ -61,16 +62,63 @@
             </div>
             <div class="comment-area">
                 <h3 class="comment-area-title">评论列表</h3>
-                {% for comment in comments  %}
-                    <div>
-                        {{ comment.user.username }}
-                        {{ comment.comment_time | date:"Y-m-d H:i:s" }} :
-                        {{ comment.text }}
-                    </div>
-                {% empty %}
-                    暂无评论
-                {% endfor %}
+                <div id="comment_list" >
+                    {% for comment in comments  %}
+                        <div>
+                            {{ comment.user.username }}
+                            ({{ comment.comment_time | date:"Y-m-d H:i:s" }}):
+                            {{ comment.text | safe }}  {# html标记转成对应格式 #}
+                        </div>
+                    {% empty %}
+                        <span id='no_comment'>暂无评论</span>
+                    {% endfor %}
+                </div>
         </div>
     </div>
-</div
+</div>
 {% endblock content %}
+
+{# ajax 异步提交, 因为直接提交会刷新页面 #}
+{% block script_extends %}
+<script type="text/javascript">
+    $('#comment_form').submit(function(){
+        
+        // 判断评论内容是否为空  包括空的换行
+        $("#comment_error").text('');
+        if(CKEDITOR.instances['id_text'].document.getBody().getText().trim() == ''){
+            $("#comment_error").text('评论内容为空');
+            return false;
+        }
+
+        // 更新数据到textarea里面
+        CKEDITOR.instances['id_text'].updateElement();
+
+        // 异步提交
+        $.ajax({
+            url: "{% url 'update_comment' %}",
+            type: 'POST',
+            data: $(this).serialize(),   // this 即 #comment_form
+            cache: false,
+            success: function(data){    // 提交成功后调用的方法
+                console.log(data);
+                // 如果成功，就插入显示数据
+                $("#no_comment").remove();
+                if(data['status']=='SUCCESS'){
+                    var comment_html = '<div>' + data['username'] +
+                          ' (' + data['comment_time'] + '): ' + data['text'] + '</div>';
+                    $("#comment_list").prepend(comment_html);
+                    // 清空评论区内容
+                    CKEDITOR.instances['id_text'].setData('');  
+                }else{
+                    // 显示错误信息
+                    $("#comment_error").text(data['message']);
+                }
+            },
+            error: function(xhr){        // 提交异常时调用的方法
+                console.log(xhr);
+            }
+        });
+        return false;
+    });
+</script>
+{% endblock script_extends %}

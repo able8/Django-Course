@@ -34,6 +34,7 @@ Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.
     - [23.html表单提交评论](#23html%E8%A1%A8%E5%8D%95%E6%8F%90%E4%BA%A4%E8%AF%84%E8%AE%BA)
     - [24.使用Django Form表单](#24%E4%BD%BF%E7%94%A8django-form%E8%A1%A8%E5%8D%95)
     - [25.表单富文本编辑和ajax异步提交评论](#25%E8%A1%A8%E5%8D%95%E5%AF%8C%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%92%8Cajax%E5%BC%82%E6%AD%A5%E6%8F%90%E4%BA%A4%E8%AF%84%E8%AE%BA)
+    - [26.回复功能设计和树结构](#26%E5%9B%9E%E5%A4%8D%E5%8A%9F%E8%83%BD%E8%AE%BE%E8%AE%A1%E5%92%8C%E6%A0%91%E7%BB%93%E6%9E%84)
 
 ## 01.什么是Django
 
@@ -1686,3 +1687,133 @@ class CommentForm(forms.Form):
 - 怎么把“暂无评论”的字样去掉(°∀°)
     - 可以把“暂无评论”改成`<span id="no_comment">暂无评论</span>`
     - 然后在ajax提交成功之后移除该节点 $("#no_comment").remove()
+
+## 26.回复功能设计和树结构
+
+- 完善评论模块，使用树结构的知识实现回复功能。主要包括树结构的知识和前端页面的代码。
+- ![评论回复](images/评论回复.png)
+
+- 如何设计回复功能
+    - 评论可以被回复
+    - 回复也可以被回复
+
+- 评论模型设计, root, parent, reply_to, 没懂，稍后再整理类，这章有点难理解
+    - 评论为根 root，如果 parent is None 那就是根
+    - reply_to 回复谁
+
+```py
+class Comment(models.Model):
+    ...
+    text = models.TextField()
+    comment_time = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, related_name='comments', on_delete=models.DO_NOTHING)
+
+    root = models.ForeignKey('self', related_name='root_comment', null=True, on_delete=models.DO_NOTHING)
+    parent = models.ForeignKey('self', related_name='parent_comment', null=True, on_delete=models.DO_NOTHING)
+    reply_to = models.ForeignKey(User, related_name='replies', null=True, on_delete=models.DO_NOTHING)
+
+```
+
+- related_name 代表的反向功能要怎么理解呢？
+    - 例如Comment有个uesr外键联系到User，这个是正向关系。而User是被联系，要从User得到相关Comment数据，这个是相对于那个外键关系来说是反过来，所以叫反向关系。若要从User获取Comment数据，是默认通过一个comment_set属性，模型名加“_set”。要更改这个属性名用related_name
+
+```py
+# 评论表单
+class CommentForm(forms.Form):
+    # 回复的哪条
+    reply_comment_id = forms.IntegerField(
+        widget=forms.HiddenInput(attrs={'id': 'reply_comment_id'}))
+
+    # 验证提交的数据
+    def clean_reply_comment_id(self):
+        reply_comment_id = self.cleaned_data['reply_comment_id']
+        if reply_comment_id < 0:
+            raise forms.ValidationError('回复出错')
+        elif reply_comment_id == 0:
+            self.cleaned_data['parent'] = None
+        elif Comment.objects.filter(pk=reply_comment_id).exists():
+            self.cleaned_data['parent'] = Comment.objects.get(
+                pk=reply_comment_id)
+        else:
+            raise forms.ValidationError('回复出错')
+        return reply_comment_id
+```
+
+- 评论列表显示 
+
+```js
+<div class="comment-area">
+    <h3 class="comment-area-title">评论列表</h3>
+    <div id="comment_list" >
+        {% for comment in comments  %}
+            <div id="root_{{ comment.pk }}" class="comment">
+                <span>{{ comment.user.username }}
+                <span>({{ comment.comment_time | date:"Y-m-d H:i:s" }}):</span>
+                <div id="comment_{{ comment.pk }}">
+                    {{ comment.text | safe }}
+                </div>
+                <a href="javascript:reply({{ comment.pk }})">回复</a>
+                
+                {% for reply in comment.root_comment.all  %}
+                    <div class="reply">
+                        <span>{{ reply.user.username }}</span>
+                        <span>({{ reply.comment_time | date:"Y-m-d H:i:s" }}):</span>
+                        <span>回复</span>
+                        <span>{{ reply.reply_to.username }}</span>
+                        <div id="comment_{{ reply.pk }}">
+                            {{ reply.text|safe }}
+                        </div>
+                        <a href="javascript:reply({{ reply.pk }})">回复</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% empty %}
+            <span id='no_comment'>暂无评论</span>
+        {% endfor %}
+    </div>
+</div>
+```
+
+- js 判断提交的是评论还是回复
+
+```js
+    // 判断是 评论 还是 回复， 不同的插入位置的
+    // 没指定#reply_comment_id 就是评论， 回复是指定回复某一条的
+    if($('#reply_comment_id').val() == '0'){
+    // 插入评论
+    var comment_html = '<div id="root_' + data['pk'] + '" class="comment"> \
+    <span>' + data['username'] + '</span> \
+    <span>(' + data['comment_time'] + '):</span>\
+    <div id="comment_' + data['pk'] + '">' + data['text'] + '</div> \
+    <a href="javascript:reply(' + data['pk'] + ');">回复</a></div>';
+    $('#comment_list').prepend(comment_html);
+
+    }else{
+    // 插入回复
+    var reply_html = '<div class="reply"><span>' + data['username'] + '</span> \
+    <span>(' + data['comment_time'] + '):</span> \
+    <span> 回复 </span> \
+    <span>' + data['reply_to'] + ': </span> \
+    <div id="comment_' + data['pk'] + '">' + data['text'] + '</div> \
+    <a href="javascript:reply(' + data['pk'] + ');">回复</a></div>';
+    $('#root_' + data['root_pk']).append(reply_html);
+
+    }
+```
+
+- js 点击回复后，屏幕滚动到评论表单, 并获得输入焦点
+
+```js
+function reply(reply_comment_id){
+    // 设置值
+    $('#reply_comment_id').val(reply_comment_id);
+    // 显示回复的哪条
+    var html = $('#comment_' + reply_comment_id).html();
+    $('#reply_content').html(html);
+    $('#reply_content_container').show();
+    // 点击回复后，屏幕滚动到评论表单, 并获得焦点,
+    $('html').animate({scrollTop: $('#comment_form').offset().top - 60 }, 300, function(){
+        CKEDITOR.instances['id_text'].focus();
+    });
+}
+```

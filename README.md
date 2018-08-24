@@ -1521,3 +1521,44 @@ def update_comment(request):
     else:
         return render(request, 'error.html', {'message': comment_form.errors, 'redirect_to': referer})
 ```
+
+- 添加并定制富文本评论表单
+    - [django-ckeditor](https://github.com/django-ckeditor/django-ckeditor)
+
+```py
+# forms.py
+from ckeditor.widgets import CKEditorWidget
+class CommentForm(forms.Form):
+    text = forms.CharField(widget=CKEditorWidget(config_name='comment_ckeditor'))
+
+# settings.py 添加设置即可，通过 comment_ckeditor
+# 配置ckeditor评论表单
+CKEDITOR_CONFIGS = {
+    'comment_ckeditor': {
+        'toolbar': 'custom',
+        'toolbar_custom': [
+            ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript'],
+            ['TextColor', 'BGColor', 'RemoveFormat'],
+            ['NumberedList', 'BulletedList'],
+            ['Link', 'Unlink'],
+            ['Smiley', 'SpecialChar', 'Blockquote'],
+        ],
+        'width': 'auto',
+        'height': '180',
+        'tabspace': 4,
+        'removePlugins': 'elementspath',
+        'resize_enable': False,
+    }
+}
+
+# 前端引入js
+<script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+<script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+
+div.django-ckeditor-widget {
+    width: 100%;
+}
+```
+
+![富文本表单](images/富文本表单.png)
+

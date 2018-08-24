@@ -5,6 +5,8 @@
 {% load staticfiles %}
 {% block header_extends %}
     <link rel="stylesheet" href="{% static 'blog/blog.css' %}">
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
 {% endblock header_extends %}
 
 {% block content %}
@@ -43,18 +45,12 @@
             <h3 class="comment-area-title">提交评论</h3>
             {% if user.is_authenticated %}
                 <form action="{% url 'update_comment' %}" method="POST" style="overflow: hidden">
+                    <label>{{ user.username }}，欢迎评论～</label>
                     {% csrf_token %}
-                    <label for="comment_text">{{ user.username }}，欢迎评论～</label>
-                    {{ comment_form }}
+                    {% for field in comment_form %}
+                        {{ field }}
+                    {% endfor %}
                     <input type="submit" value="评论" class="btn btn-primary" style="float:right">
-
-                    {% comment %} 
-                    <div class="form-group">
-                        <label for="comment_text">{{ user.username }}，欢迎评论～</label>
-                        <textarea name="text" id="comment_text" cols="80" rows="4" class="form-control">                       </textarea></div>
-                    <input type="hidden" name="object_id" value="{{ blog.pk }}">
-                    <input type="hidden" name="content_type" value="blog">
-                    <input type="submit" value="评论" class="btn btn-primary" style="float:right"> {% endcomment %}
                 </form>
             {% else %}
                 未登录，登录后方可评论

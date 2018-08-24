@@ -1216,17 +1216,16 @@ def blog_detail(request, blog_pk):
     - 字段 就是 html input 标签
     - 每个字段类型都有一个适当的默认Widget类
 
+- 定制登录表单
+
 ```py
 # forms.py
 from django import forms
 from django.contrib import auth
-
-
 # 定制登录表单
 class LoginForm(forms.Form):
     username = forms.CharField(label='用户名', required=True) # 默认为True
     password = forms.CharField(label='密码', widget=forms.PasswordInput)
-
 # views.py
 def login(request):
     if request.method == 'POST':
@@ -1367,5 +1366,89 @@ class LoginForm(forms.Form):
         </div>
     </div>
 </div>
+```
 
+- 定制用户注册表单，并验证数据
+
+```py
+class RegForm(forms.Form):
+    username = forms.CharField(label='用户名',
+                        required=True, # 默认为True
+                        max_length=30,
+                        min_length=4,
+                        widget=forms.TextInput(attrs={'class': 'form-control',
+                            'placeholder':'请输入3-30位用户名'}))
+    email = forms.EmailField(label='邮箱',
+                        widget=forms.TextInput(attrs={'class': 'form-control',
+                            'placeholder':'请输入邮箱'}))
+
+    password = forms.CharField(label='密码',
+                        min_length=6,
+                        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder':'请输入密码'}))
+    password_again = forms.CharField(label='密码',
+                        min_length=6,
+                        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder':'再输入一次密码'}))
+
+    # 验证数据, 是否有效，是否存在
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError('用户名已存在')
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('邮箱已存在')
+        return email
+
+    def clean_password_again(self):
+        password = self.cleaned_data['password']
+        password_again = self.cleaned_data['password_again']
+        if password != password_again:
+            raise forms.ValidationError('两次输入的密码不一致')
+        return password_again
+```
+
+- 优化前端 登录 或 注册 按钮
+```js
+未登录，登录后方可评论
+<a class="btn btn-primary" href="{% url 'login' %}?from={{ request.get_full_path }}">登录</a>
+<span>or</span>
+<a class="btn btn-danger" href="{% url 'register' %}?from={{ request.get_full_path }}">注册</a>
+
+```
+
+- 注册用户 处理
+
+```py
+def register(request):
+    if request.method == 'POST':
+        reg_form = RegForm(request.POST)
+        if reg_form.is_valid():
+            username = reg_form.cleaned_data['username']
+            password = reg_form.cleaned_data['password']
+            email = reg_form.cleaned_data['email']
+            # 创建用户
+            user = User.objects.create_user(username, email, password) 
+            user.save()
+            # 或者
+            '''
+            user = User()
+            user.username = username
+            user.email = email
+            user.set_password(password)
+            user.save()
+            '''
+            # 登录用户
+            user = auth.authenticate(username=username, password=password)
+            auth.login(request, user)
+            # 跳转注册之前的页面
+            return redirect(request.GET.get('from', reverse('home')))
+    else:
+        reg_form = RegForm() # 实例化表单
+
+    context = {}
+    context['reg_form'] = reg_form
+    return render(request, 'register.html', context)
 ```

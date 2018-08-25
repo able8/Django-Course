@@ -107,6 +107,22 @@
 {# ajax 异步提交, 因为直接提交会刷新页面 #}
 {% block script_extends %}
 <script type="text/javascript">
+
+    // js 时间戳转当前时间，并格式化显示
+    function numFormat(num){
+        return ('00' + num).substr(-2);
+    }
+    function timeFormat(timestamp){
+        var datetime = new Date(timestamp * 1000);
+        var year = datetime.getFullYear();
+        var month = numFormat(datetime.getMonth()) + 1;
+        var day = numFormat(datetime.getDate());
+        var hour = numFormat(datetime.getHours());
+        var minute = numFormat(datetime.getMinutes());
+        var second = numFormat(datetime.getSeconds());
+        return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second
+    }
+
     $('#comment_form').submit(function(){
 
         // 判断评论内容是否为空  包括空的换行
@@ -135,7 +151,7 @@
                     // 插入评论
                     var comment_html = '<div id="root_' + data['pk'] + '" class="comment"> \
                     <span>' + data['username'] + '</span> \
-                    <span>(' + data['comment_time'] + '):</span>\
+                    <span>(' + timeFormat(data['comment_time']) + '):</span>\
                     <div id="comment_' + data['pk'] + '">' + data['text'] + '</div> \
                     <a href="javascript:reply(' + data['pk'] + ');">回复</a></div>';
                     $('#comment_list').prepend(comment_html);
@@ -143,7 +159,7 @@
                     }else{
                     // 插入回复
                     var reply_html = '<div class="reply"><span>' + data['username'] + '</span> \
-                    <span>(' + data['comment_time'] + '):</span> \
+                    <span>(' + timeFormat(data['comment_time']) + '):</span> \
                     <span> 回复 </span> \
                     <span>' + data['reply_to'] + ': </span> \
                     <div id="comment_' + data['pk'] + '">' + data['text'] + '</div> \

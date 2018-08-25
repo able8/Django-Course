@@ -1854,7 +1854,7 @@ def get_comment_count(obj):
 评论({% get_comment_count blog %}
 ```
 
--  将views中的评论表单和评论列表分离到模版标签中，精简代码
+- 将views中的评论表单和评论列表分离到模版标签中，精简代码
 
 ```py
 @register.simple_tag
@@ -1880,4 +1880,25 @@ def get_comment_list(obj):
 
 {% get_comment_list blog as comments %}
 {% for comment in comments  %}
+```
+
+- 修复ajax获取的评论时间时区问题
+
+```js
+    //js 时间戳转当前时间，并格式化显示
+    function numFormat(num){
+        return ('00' + num).substr(-2);
+    }
+    function timeFormat(timestamp){
+        var datetime = new Date(timestamp * 1000);
+        var year = datetime.getFullYear();
+        var month = numFormat(datetime.getMonth()) + 1;
+        var day = numFormat(datetime.getDate());
+        var hour = numFormat(datetime.getHours());
+        var minute = numFormat(datetime.getMinutes());
+        var second = numFormat(datetime.getSeconds());
+        return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second
+    }
+
+data['comment_time'] = comment.comment_time.timestamp()
 ```

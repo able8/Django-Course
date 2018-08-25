@@ -33,16 +33,16 @@
             </div>
 
             <div class="blog-more">
-                <p>上一篇: 
+                <p>上一篇:
                     {% if previous_blog %}
-                       <a href="{% url 'blog_detail' previous_blog.pk  %}">{{ previous_blog.title }}</a> 
+                       <a href="{% url 'blog_detail' previous_blog.pk  %}">{{ previous_blog.title }}</a>
                     {% else %}
                         没有了
                     {% endif %}
                      </p>
-                <p>下一篇: 
+                <p>下一篇:
                     {% if next_blog %}
-                         <a href="{% url 'blog_detail' next_blog.pk  %}">{{ next_blog.title }}</a>  
+                         <a href="{% url 'blog_detail' next_blog.pk  %}">{{ next_blog.title }}</a>
                     {% else %}
                         没有了
                     {% endif %}
@@ -94,7 +94,7 @@
                             </div>
 
                             <a href="javascript:reply({{ comment.pk }})">回复</a>
-                           
+
                             {% for reply in comment.root_comment.all  %}
                                 <div class="reply">
                                     <span>{{ reply.user.username }}</span>
@@ -121,6 +121,34 @@
             </div>
         </div>
     </div>
+
+<!-- Modal -->
+<div class="modal fade" id="login_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <form id="login_modal_form" action="" method="POST">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">登录</h4>
+                </div>
+                <div class="modal-body">
+                    {% csrf_token %}
+                    {% for field in login_form %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% endfor %}
+                    <span id="login_modal_tip" class="text-danger"></span>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">登录</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 </div>
 {% endblock content %}
 
@@ -173,17 +201,17 @@
             success: function(data){    // 提交成功后调用的方法, data是后端返回给前端的数据
                 console.log(data);
                 // 如果成功，就插入显示数
-                
+
                 if(data['status']=='SUCCESS'){
                     // 判断是 评论 还是 回复， 不同的插入位置的
                     if($('#reply_comment_id').val() == '0'){
                     // 插入评论
-                    var comment_html = '<div id="root_{0}" class="comment">' + 
-                        '<span>({2}):</span>' + 
-                        '<div id="comment_{0}"> {3} </div>' + 
-                        '<div class="like" onclick="likeChange(this, \'{4}\', {0})">' + 
-                        '<span class="glyphicon glyphicon-thumbs-up "></span>' + 
-                        '<span class="liked-num"> 0 </span></div>' + 
+                    var comment_html = '<div id="root_{0}" class="comment">' +
+                        '<span>({2}):</span>' +
+                        '<div id="comment_{0}"> {3} </div>' +
+                        '<div class="like" onclick="likeChange(this, \'{4}\', {0})">' +
+                        '<span class="glyphicon glyphicon-thumbs-up "></span>' +
+                        '<span class="liked-num"> 0 </span></div>' +
                         '<a href="javascript:reply({0})">回复</a></div>';
                         comment_html = comment_html.format(
                             data['pk'], data['username'], timeFormat(data['comment_time']), data['text'], data['content_type']
@@ -194,15 +222,15 @@
 
                     }else{
                     // 插入回复
-                    var reply_html = '<div class="reply">' + 
-                    '<span>{1}</span>' + 
-                    '<span>({2}):</span>' + 
-                    '<span>回复</span>' + 
-                    '<span>{3}</span>' + 
-                    '<div id="comment_{0}"> {4} </div>' + 
-                    '<div class="like" onclick="likeChange(this, \'{5}\', {0})">' + 
-                    '<span class="glyphicon glyphicon-thumbs-up"></span>' + 
-                    '<span class="liked-num"> 0 </span> </div>' + 
+                    var reply_html = '<div class="reply">' +
+                    '<span>{1}</span>' +
+                    '<span>({2}):</span>' +
+                    '<span>回复</span>' +
+                    '<span>{3}</span>' +
+                    '<div id="comment_{0}"> {4} </div>' +
+                    '<div class="like" onclick="likeChange(this, \'{5}\', {0})">' +
+                    '<span class="glyphicon glyphicon-thumbs-up"></span>' +
+                    '<span class="liked-num"> 0 </span> </div>' +
                     '<a href="javascript:reply({0})">回复</a> </div>';
                     reply_html = reply_html.format(
                         data['pk'], data['username'], timeFormat(data['comment_time']), data['reply_to'], data['text'], data['content_type']
@@ -210,9 +238,9 @@
                     $('#root_' + data['root_pk']).append(reply_html);
 
                     }
-                    
+
                     // 清空评论区内容
-                    CKEDITOR.instances['id_text'].setData('');  
+                    CKEDITOR.instances['id_text'].setData('');
                     $('#reply_content_container').hide();
                     $('#reply_comment_id').val('0');
                     $("#no_comment").remove();
@@ -269,7 +297,11 @@
                     var liked_num = $(obj.getElementsByClassName('liked-num'));
                     liked_num.text(data['liked_num']);
                 }else{
-                    alert(data['message']);
+                    if(data['code'] == 400){
+                        $('#login_modal').modal('show');
+                    }else{
+                        alert(data['message']);
+                    }
                 }
             },
             error: function(xhr){
@@ -278,5 +310,21 @@
         });
     }
 
+    $('#login_modal_form').submit(function(eventt){
+        event.preventDefault(); // 阻止页面提交
+        $.ajax({
+            url: "{% url 'login_for_modal' %}",
+            type: 'POST',
+            data: $(this).serialize(),
+            cache: false,
+            success: function(data){
+                if(data['status'] == 'SUCCESS'){
+                    window.location.reload(); // 刷新页面
+                }else{
+                    $('#login_modal_tip').text('用户名或密码错误');
+                }
+            }
+        });
+    });
 </script>
 {% endblock script_extends %}

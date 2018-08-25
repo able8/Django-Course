@@ -1228,7 +1228,7 @@ def blog_detail(request, blog_pk):
 
     blog_content_type = ContentType.objects.get_for_model(blog)
     comments = Comment.objects.filter(content_type=blog_content_type, object_id=blog.pk)
-    
+
     context = {}
     context['comments'] = comments
     context['previous_blog'] = Blog.objects.filter(created_time__gt=blog.created_time).last()
@@ -1278,7 +1278,7 @@ def login(request):
     else:
         # get 加载页面
         login_form = LoginForm() # 实例化表单
-    
+
     context = {}
     context['login_form'] = login_form
     return render(request, 'login.html', context)
@@ -1366,7 +1366,7 @@ class LoginForm(forms.Form):
                         widget=forms.TextInput(attrs={'class': 'form-control',
                             'placeholder':'请输入用户名'}))
                         # 设置渲染后的html的属性
-                        
+
     password = forms.CharField(label='密码',
                         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder':'请输入密码'}))
 
@@ -1376,7 +1376,7 @@ class LoginForm(forms.Form):
 <div class="containter">
     <div class="row">
         <div class="col-xs-4 col-xs-offset-4">
-    
+
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">登录</h3>
@@ -1466,7 +1466,7 @@ def register(request):
             password = reg_form.cleaned_data['password']
             email = reg_form.cleaned_data['email']
             # 创建用户
-            user = User.objects.create_user(username, email, password) 
+            user = User.objects.create_user(username, email, password)
             user.save()
             # 或者
             '''
@@ -1635,7 +1635,7 @@ div.django-ckeditor-widget {
                           ' (' + data['comment_time'] + '): ' + data['text'] + '</div>';
                     $("#comment_list").prepend(comment_html);
                     // 清空评论区内容
-                    CKEDITOR.instances['id_text'].setData('');  
+                    CKEDITOR.instances['id_text'].setData('');
                 }else{
                     // 显示错误信息
                     $("#comment_error").text(data['message']);
@@ -1742,7 +1742,7 @@ class CommentForm(forms.Form):
         return reply_comment_id
 ```
 
-- 评论列表显示 
+- 评论列表显示
 
 ```js
 <div class="comment-area">
@@ -1756,7 +1756,7 @@ class CommentForm(forms.Form):
                     {{ comment.text | safe }}
                 </div>
                 <a href="javascript:reply({{ comment.pk }})">回复</a>
-                
+
                 {% for reply in comment.root_comment.all  %}
                     <div class="reply">
                         <span>{{ reply.user.username }}</span>
@@ -1950,7 +1950,7 @@ p#reply_title {
     - 设置请求的 总分 urls
 
 ```py
-# Django_Course/mysite/likes/models.py 
+# Django_Course/mysite/likes/models.py
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -2105,7 +2105,7 @@ def like_change(request):
 - 设置模版标签, 方便模版引用，不在views中更加独立
 
 ```py
-# Django_Course/mysite/likes/templatetags/likes_tags.py 
+# Django_Course/mysite/likes/templatetags/likes_tags.py
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from ..models import LikeCount, LikeRecord
@@ -2200,12 +2200,12 @@ $.ajax({
             // 判断是 评论 还是 回复， 不同的插入位置的
             if($('#reply_comment_id').val() == '0'){
             // 插入评论
-            var comment_html = '<div id="root_{0}" class="comment">' + 
-                '<span>({2}):</span>' + 
-                '<div id="comment_{0}"> {3} </div>' + 
-                '<div class="like" onclick="likeChange(this, \'{4}\', {0})">' + 
-                '<span class="glyphicon glyphicon-thumbs-up "></span>' + 
-                '<span class="liked-num"> 0 </span></div>' + 
+            var comment_html = '<div id="root_{0}" class="comment">' +
+                '<span>({2}):</span>' +
+                '<div id="comment_{0}"> {3} </div>' +
+                '<div class="like" onclick="likeChange(this, \'{4}\', {0})">' +
+                '<span class="glyphicon glyphicon-thumbs-up "></span>' +
+                '<span class="liked-num"> 0 </span></div>' +
                 '<a href="javascript:reply({0})">回复</a></div>';
                 comment_html = comment_html.format(
                     data['pk'], data['username'], timeFormat(data['comment_time']), data['text'], data['content_type'])
@@ -2213,4 +2213,82 @@ $.ajax({
 ...
 ```
 
-- 
+- 未登录时，弹出一个模态框登录
+    - [模态框](https://v3.bootcss.com/javascript/#modals)
+    - 以弹出对话框的形式出现，具有最小和最实用的功能集。
+
+- 登录框 代码, 引入之前的 login form
+
+```js
+<!-- Modal -->
+<div class="modal fade" id="login_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <form id="login_modal_form" action="" method="POST">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">登录</h4>
+                </div>
+                <div class="modal-body">
+                    {% csrf_token %}
+                    {% for field in login_form %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% endfor %}
+                    <span id="login_modal_tip" class="text-danger"></span>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">登录</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+```
+
+- 添加路由url，用于弹出登录框提交请求
+    - `path('login_for_modal/', views.login_for_modal, name='login_for_modal'),`
+
+- ajax 提交登录信息
+
+```js
+// 但检查未登录时 显示登录框
+if(data['code'] == 400){
+    $('#login_modal').modal('show');
+
+// 提交登录请求
+$('#login_modal_form').submit(function(eventt){
+    event.preventDefault(); // 阻止页面提交
+    $.ajax({
+        url: "{% url 'login_for_modal' %}",
+        type: 'POST',
+        data: $(this).serialize(),
+        cache: false,
+        success: function(data){
+            if(data['status'] == 'SUCCESS'){
+                window.location.reload(); // 刷新页面
+            }else{
+                $('#login_modal_tip').text('用户名或密码错误');
+            }
+        }
+    });
+});
+
+```
+
+- 处理登录请求
+
+```py
+def login_for_modal(request):
+    login_form = LoginForm(request.POST)
+    data = {}
+    if login_form.is_valid():
+        user = login_form.cleaned_data['user']
+        auth.login(request, user)
+        data['status'] = 'SUCCESS'
+    else:
+        data['status'] = 'ERROR'
+    return JsonResponse(data)
+```

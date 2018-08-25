@@ -15,7 +15,7 @@
 <div class="containter">
     <div class="row">
         <div class="col-xs-4 col-xs-offset-4">
-    
+
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">登录</h3>
@@ -25,7 +25,7 @@
                         {% csrf_token %}
                         {% comment %} {{ login_form }} 定制显示 {% endcomment %}
                         {% for field in login_form %}
-                            <label for="field.id_for_label">{{ field.label }}</label>
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                             {{ field }}
                             <p class="text-danger">
                                 {{ field.errors.as_text }}

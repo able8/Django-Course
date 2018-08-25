@@ -1906,7 +1906,7 @@ data['comment_time'] = comment.comment_time.timestamp()
 
 - 调整回复表单的CSS样式
 
-![回复评论样式](/iamges/回复评论样式.png)
+![回复评论样式](/images/回复评论样式.png)
 
 ```css
 div#reply_content_container {
@@ -1928,3 +1928,7 @@ p#reply_title {
     - `User表是主，当删除用户后，DO_NOTHING还会保留用户的评论里的用户，造成数据不完整`
     - 数据库会提示，`FOREIGN KEY constraint failed`
     - 换成 `on_delete=models.CASCADE`, 删除用户后，包含在评论里的用户也删除
+
+- 修复 django-ckeditor 报错
+    - `No configuration named 'default' found in your CKEDITOR_CONFIGS`
+    - settings中添加 `'default': {},`

@@ -141,6 +141,7 @@ CKEDITOR_UPLOAD_PATH = 'upload/'
 
 # 配置ckeditor评论表单
 CKEDITOR_CONFIGS = {
+    'default': {},
     'comment_ckeditor': {
         'toolbar': 'custom',
         'toolbar_custom': [

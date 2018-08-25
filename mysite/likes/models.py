@@ -11,7 +11,7 @@ class LikeCount(models.Model):
 
     liked_num = models.IntegerField(default=0)
 
-class LikeRecode(models.Model):
+class LikeRecord(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')

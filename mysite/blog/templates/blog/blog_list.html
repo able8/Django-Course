@@ -4,6 +4,7 @@
 
 {% load staticfiles %}
 {% load comment_tags %}
+{% load likes_tags %}
 
 {% block header_extends %}
     <link rel="stylesheet" href="{% static 'blog/blog.css' %}">
@@ -30,6 +31,7 @@
                                   {{ blog.created_time|date:'Y-m-d' }} 
                                   &nbsp;&nbsp;阅读({{ blog.get_read_num }})
                                   &nbsp;&nbsp;评论({% get_comment_count blog %})
+                                  &nbsp;&nbsp;点赞({% get_like_count blog %})
                             </div>
                             <p>{{ blog.content|striptags|truncatechars:120 }}</p>
                         </div>

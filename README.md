@@ -36,7 +36,7 @@ Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.
     - [25.表单富文本编辑和ajax异步提交评论](#25%E8%A1%A8%E5%8D%95%E5%AF%8C%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%92%8Cajax%E5%BC%82%E6%AD%A5%E6%8F%90%E4%BA%A4%E8%AF%84%E8%AE%BA)
     - [26.回复功能设计和树结构](#26%E5%9B%9E%E5%A4%8D%E5%8A%9F%E8%83%BD%E8%AE%BE%E8%AE%A1%E5%92%8C%E6%A0%91%E7%BB%93%E6%9E%84)
     - [27.获取评论数和细节处理](#27%E8%8E%B7%E5%8F%96%E8%AF%84%E8%AE%BA%E6%95%B0%E5%92%8C%E7%BB%86%E8%8A%82%E5%A4%84%E7%90%86)
-    - [28.用所学知识实现点赞功能](#28%E7%94%A8%E6%89%80%E5%AD%A6%E7%9F%A5%E8%AF%86%E5%AE%9E%E7%8E%B0%E7%82%B9%E8%B5%9E%E5%8A%9F%E8%83%BD)
+    - [28.实现点赞功能, 看似简单，内容很多](#28%E5%AE%9E%E7%8E%B0%E7%82%B9%E8%B5%9E%E5%8A%9F%E8%83%BD-%E7%9C%8B%E4%BC%BC%E7%AE%80%E5%8D%95%E5%86%85%E5%AE%B9%E5%BE%88%E5%A4%9A)
 
 ## 01.什么是Django
 
@@ -1934,7 +1934,7 @@ p#reply_title {
     - `No configuration named 'default' found in your CKEDITOR_CONFIGS`
     - settings中添加 `'default': {},`
 
-## 28.用所学知识实现点赞功能
+## 28.实现点赞功能, 看似简单，内容很多
 
 - 点赞功能设计
     - 博客和评论、回复都可以点赞
@@ -1946,6 +1946,7 @@ p#reply_title {
     - `python manage.py startapp likes`
     - 注册app
     - 数据库迁移
+    - 设置请求的 总分 urls
 
 ```py
 # Django_Course/mysite/likes/models.py 
@@ -1961,11 +1962,199 @@ class LikeCount(models.Model):
 
     liked_num = models.IntegerField(default=0)
 
-class LikeRecode(models.Model):
+class LikeRecord(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     liked_time = models.DateTimeField(auto_now_add=True)
+
+# 总 urls 添加
+path('likes/', include('likes.urls')),
+
+# app  urls
+path('like_change', views.like_change, name='like_change')
+
 ```
+
+- ajax 异步提交改变 点赞 请求
+
+```js
+function likeChange(obj, content_type, object_id){
+        var is_like = (obj.getElementsByClassName('active').length == 0);
+        console.log(is_like)
+        // 异步提交
+        $.ajax({
+            url: "{% url 'like_change' %}",
+            type: 'GET',
+            data: {
+                content_type: content_type,
+                object_id: object_id,
+                is_like: is_like,
+            },
+            cache: false,
+            success: function(data){
+                console.log(data);
+                if(data['status'] == 'SUCCESS'){
+                    // 更新点赞状态
+                    var element = $(obj.getElementsByClassName('glyphicon'));
+                    if(is_like){
+                        element.addClass('active');
+                    }else{
+                        element.removeClass('active');
+                    }
+                    // 更新点赞数量
+                    var liked_num = $(obj.getElementsByClassName('liked-num'));
+                    liked_num.text(data['liked_num']);
+                }else{
+                    alert(data['message']);
+                }
+            },
+            error: function(xhr){
+                console.log(xhr)
+            }
+        });
+    }
+
+```
+
+- css 点赞样式
+
+```css
+div.like {
+    color: #337ab7;
+    cursor: pointer;
+    display: inline-block;
+    padding: 0.5em 0.3em;
+}
+
+div.like .active{
+    color: red;
+}
+
+```
+
+- views 处理点赞请求，验证各种状态
+
+```py
+def ErrorResponse(code, message):
+    data = {}
+    data['status'] = 'ERROR'
+    data['code'] = code
+    data['message'] = message
+    return JsonResponse(data)
+
+def SuccessResponse(liked_num):
+    data = {}
+    data['status'] = 'SUCCESS'
+    data['liked_num'] = liked_num
+    return JsonResponse(data)
+
+def like_change(request):
+    # 获取请求传递的数据
+    # 获取用户，验证用户登录
+    user = request.user
+    if not user.is_authenticated:
+        return ErrorResponse(400, 'you were not login')
+
+    content_type = request.GET.get('content_type')
+    object_id = int(request.GET.get('object_id'))
+
+    try:
+        content_type = ContentType.objects.get(model=content_type)
+        model_class = content_type.model_class()
+        model_obj = model_class.objects.get(pk=object_id)
+    except ObjectDoesNotExist:
+        return ErrorResponse(401, 'object not exist')
+
+    # 处理数据
+    if request.GET.get('is_like') == 'true':
+        # 要点赞
+        print('hi')
+        like_record, created = LikeRecord.objects.get_or_create(content_type=content_type, object_id=object_id, user=user)
+        if created:
+            # 未点赞过，点赞数加1
+            like_count, created = LikeCount.objects.get_or_create(content_type=content_type, object_id=object_id)
+            like_count.liked_num += 1
+            like_count.save()
+            return SuccessResponse(like_count.liked_num)
+        else:
+            # 已点赞过，不能重复点赞
+            return ErrorResponse(402, 'you were liked')
+    else:
+        # 取消点赞
+        if LikeRecord.objects.filter(content_type=content_type, object_id=object_id, user=user):
+            # 有点赞，取消点赞
+            like_record = LikeRecord.objects.get(content_type=content_type, object_id=object_id, user=user)
+            like_record.delete()
+            # 点赞总数 -1
+            like_count, created = LikeCount.objects.get_or_create(content_type=content_type, object_id=object_id)
+            if not created:
+                like_count.liked_num -= 1
+                like_count.save()
+                return SuccessResponse(like_count.liked_num)
+            else:
+                return ErrorResponse(404, 'data error')
+        else:
+            # 没点赞过，不能取消
+            return ErrorResponse(403, 'you were not liked')
+```
+
+- 设置模版标签, 方便模版引用，不在views中更加独立
+
+```py
+# Django_Course/mysite/likes/templatetags/likes_tags.py 
+from django import template
+from django.contrib.contenttypes.models import ContentType
+from ..models import LikeCount, LikeRecord
+
+register = template.Library()
+
+@register.simple_tag
+def get_like_count(obj):
+    content_type = ContentType.objects.get_for_model(obj)
+    like_count, created = LikeCount.objects.get_or_create(
+        content_type=content_type, object_id=obj.pk)
+    return like_count.liked_num
+
+
+@register.simple_tag(takes_context=True)  # 使用模版里面的变量
+def get_like_status(context, obj):
+    content_type = ContentType.objects.get_for_model(obj)
+    user = context['user']
+    if not user.is_authenticated:
+        return ''
+    if LikeRecord.objects.filter(
+            content_type=content_type, object_id=obj.pk, user=user).exists():
+        return 'active'
+    else:
+        return ''
+
+@register.simple_tag
+def get_content_type(obj):
+    content_type = ContentType.objects.get_for_model(obj)
+    return content_type.model
+```
+
+- 模版中引用模版标签
+
+```js
+{% load likes_tags %}
+// 博客列表中引用
+点赞({% get_like_count blog %})
+
+// 添加点赞功能到评论列表
+<div class="like" onclick="likeChange(this, '{% get_content_type comment %}', {{ comment.pk }})">
+    <span class="glyphicon glyphicon-thumbs-up {% get_like_status comment %}"></span>
+    <span class="liked-num">{% get_like_count comment %}</span>
+</div>
+// 添加点赞功能回复列表
+<div class="like" onclick="likeChange(this, '{% get_content_type reply %}', {{ reply.pk }})">
+    <span class="glyphicon glyphicon-thumbs-up {% get_like_status reply %}"></span>
+    <span class="liked-num">{% get_like_count reply %}</span>
+</div>
+```
+
+- 前后端开发建议
+    - 功能需求分析 -》模型设计 -》前端初步开发 -》后端实现 -》完善前端代码

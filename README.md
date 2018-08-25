@@ -37,6 +37,7 @@ Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.
     - [26.回复功能设计和树结构](#26%E5%9B%9E%E5%A4%8D%E5%8A%9F%E8%83%BD%E8%AE%BE%E8%AE%A1%E5%92%8C%E6%A0%91%E7%BB%93%E6%9E%84)
     - [27.获取评论数和细节处理](#27%E8%8E%B7%E5%8F%96%E8%AF%84%E8%AE%BA%E6%95%B0%E5%92%8C%E7%BB%86%E8%8A%82%E5%A4%84%E7%90%86)
     - [28.实现点赞功能, 看似简单，内容很多](#28%E5%AE%9E%E7%8E%B0%E7%82%B9%E8%B5%9E%E5%8A%9F%E8%83%BD-%E7%9C%8B%E4%BC%BC%E7%AE%80%E5%8D%95%E5%86%85%E5%AE%B9%E5%BE%88%E5%A4%9A)
+    - [29.完善点赞功能](#29%E5%AE%8C%E5%96%84%E7%82%B9%E8%B5%9E%E5%8A%9F%E8%83%BD)
 
 ## 01.什么是Django
 
@@ -2158,3 +2159,58 @@ def get_content_type(obj):
 
 - 前后端开发建议
     - 功能需求分析 -》模型设计 -》前端初步开发 -》后端实现 -》完善前端代码
+
+- 模版标签
+    - the Jinja2 template engine was inspired by the Django template language
+    - therefore their syntax is quite similar!
+    - 表达式 `{% ... %} is used for statements.`
+    - 变量 `{{ ... }} is used for variables`
+    - 注释 `{# ... #} is used for to comment`
+
+## 29.完善点赞功能
+
+- 完善点赞功能，让新增的评论和回复可以点赞。
+    - 这里涉及到js字符串拼接的问题。
+    - 点赞时，未登录的情况下弹出一个模态框登录
+
+- 新增评论和回复点赞
+    - 因为我们新增加的评论和回复没有添加onclick事件
+    - 解决js字符串拼接的问题
+
+```js
+// 定义字符串格式化方法，解决字符串拼接麻烦问题
+// '{0}+{1}'.format('a', 'b') -> "a+b"
+String.prototype.format = function(){
+    var str = this;
+    for (var i = 0; i < arguments.length; i++) {
+        var str = str.replace(new RegExp('\\{' + i + '\\}', 'g'), arguments[i])
+    };
+    return str;
+}
+// 异步提交
+$.ajax({
+    url: "{% url 'update_comment' %}",
+    type: 'POST',
+    data: $(this).serialize(),   // this 即 #comment_form
+    cache: false,
+    success: function(data){    // 提交成功后调用的方法, data是后端返回给前端的数据
+        console.log(data);
+        // 如果成功，就插入显示数
+        if(data['status']=='SUCCESS'){
+            // 判断是 评论 还是 回复， 不同的插入位置的
+            if($('#reply_comment_id').val() == '0'){
+            // 插入评论
+            var comment_html = '<div id="root_{0}" class="comment">' + 
+                '<span>({2}):</span>' + 
+                '<div id="comment_{0}"> {3} </div>' + 
+                '<div class="like" onclick="likeChange(this, \'{4}\', {0})">' + 
+                '<span class="glyphicon glyphicon-thumbs-up "></span>' + 
+                '<span class="liked-num"> 0 </span></div>' + 
+                '<a href="javascript:reply({0})">回复</a></div>';
+                comment_html = comment_html.format(
+                    data['pk'], data['username'], timeFormat(data['comment_time']), data['text'], data['content_type'])
+            $('#comment_list').prepend(comment_html);
+...
+```
+
+- 

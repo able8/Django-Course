@@ -40,7 +40,6 @@ def like_change(request):
     # 处理数据
     if request.GET.get('is_like') == 'true':
         # 要点赞
-        print('hi')
         like_record, created = LikeRecord.objects.get_or_create(content_type=content_type, object_id=object_id, user=user)
         if created:
             # 未点赞过，点赞数加1

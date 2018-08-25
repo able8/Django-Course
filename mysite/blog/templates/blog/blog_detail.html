@@ -50,7 +50,7 @@
                 <form id="comment_form" action="{% url 'update_comment' %}" method="POST" style="overflow: hidden">
                     <label>{{ user.username }}，欢迎评论～</label>
                     <div id="reply_content_container" style="display: none;">
-                        <p>回复：</p>
+                        <p id="reply_title">回复：</p>
                         <div id="reply_content"> </div>
                     </div>
                     {% csrf_token %}
@@ -173,14 +173,14 @@
                     $('#reply_content_container').hide();
                     $('#reply_comment_id').val('0');
                     $("#no_comment").remove();
-
+                    $("#comment_error").text('评论成功');
                 }else{
                     // 显示错误信息
                     $("#comment_error").text(data['message']);
                 }
             },
             error: function(xhr){        // 提交异常时调用的方法
-                console.log(xhr);
+                console.log(xhr)
             }
         });
         return false;

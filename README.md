@@ -1902,3 +1902,22 @@ def get_comment_list(obj):
 
 data['comment_time'] = comment.comment_time.timestamp()
 ```
+
+- 调整回复表单的CSS样式
+
+![回复评论样式](/iamges/回复评论样式.png)
+
+```css
+div#reply_content_container {
+    border: 1px solid #d1d1d1;
+    border-bottom: none;
+    background-color: #f8f8f8;
+    overflow: hidden;
+    padding: 1em 1em 0.5em;
+}
+
+p#reply_title {
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 0.5em;
+}
+```

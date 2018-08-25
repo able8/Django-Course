@@ -36,6 +36,7 @@ Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.
     - [25.表单富文本编辑和ajax异步提交评论](#25%E8%A1%A8%E5%8D%95%E5%AF%8C%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%92%8Cajax%E5%BC%82%E6%AD%A5%E6%8F%90%E4%BA%A4%E8%AF%84%E8%AE%BA)
     - [26.回复功能设计和树结构](#26%E5%9B%9E%E5%A4%8D%E5%8A%9F%E8%83%BD%E8%AE%BE%E8%AE%A1%E5%92%8C%E6%A0%91%E7%BB%93%E6%9E%84)
     - [27.获取评论数和细节处理](#27%E8%8E%B7%E5%8F%96%E8%AF%84%E8%AE%BA%E6%95%B0%E5%92%8C%E7%BB%86%E8%8A%82%E5%A4%84%E7%90%86)
+    - [28.用所学知识实现点赞功能](#28%E7%94%A8%E6%89%80%E5%AD%A6%E7%9F%A5%E8%AF%86%E5%AE%9E%E7%8E%B0%E7%82%B9%E8%B5%9E%E5%8A%9F%E8%83%BD)
 
 ## 01.什么是Django
 
@@ -1932,3 +1933,39 @@ p#reply_title {
 - 修复 django-ckeditor 报错
     - `No configuration named 'default' found in your CKEDITOR_CONFIGS`
     - settings中添加 `'default': {},`
+
+## 28.用所学知识实现点赞功能
+
+- 点赞功能设计
+    - 博客和评论、回复都可以点赞
+    - 可以取消点赞
+    - 可看到点赞总数
+    - 用户登录后才可以点赞 (视频里这样设计的，如何改进不用用户登录呢？)
+
+- 创建点赞 `likes` app
+    - `python manage.py startapp likes`
+    - 注册app
+    - 数据库迁移
+
+```py
+# Django_Course/mysite/likes/models.py 
+from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User
+
+class LikeCount(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    liked_num = models.IntegerField(default=0)
+
+class LikeRecode(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    liked_time = models.DateTimeField(auto_now_add=True)
+```

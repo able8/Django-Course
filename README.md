@@ -1853,3 +1853,31 @@ def get_comment_count(obj):
 {% load comment_tags %}
 评论({% get_comment_count blog %}
 ```
+
+-  将views中的评论表单和评论列表分离到模版标签中，精简代码
+
+```py
+@register.simple_tag
+def get_comment_form(obj):
+    content_type = ContentType.objects.get_for_model(obj)
+    form = CommentForm(initial={
+        'content_type': content_type,
+        'object_id': obj.pk,
+        'reply_comment_id': 0
+    })
+    return form
+
+@register.simple_tag
+def get_comment_list(obj):
+    content_type = ContentType.objects.get_for_model(obj)
+    comments = comments = Comment.objects.filter(
+        content_type=content_type, object_id=obj.pk, parent=None)
+    return comments.order_by('-comment_time')
+
+# 引用
+{% get_comment_form blog as comment_form %}
+{% for field in comment_form %}
+
+{% get_comment_list blog as comments %}
+{% for comment in comments  %}
+```

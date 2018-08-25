@@ -259,7 +259,7 @@ class Article(models.Model):
     # created_time = models.DateTimeField(default=timezone.now)
     created_time = models.DateTimeField(auto_now_add=True)
     last_updated_time = models.DateTimeField(auto_now=True)
-    author = models.ForeignKey(User, on_delete=models.DO_NOTHING, default=1)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     is_deleted = models.BooleanField(default=False)
     readed_num = models.IntegerField(default=0)
 
@@ -377,9 +377,9 @@ class BlogType(models.Model):
 
 class Blog(models.Model):
     title = models.CharField(max_length=50)
-    blog_type = models.ForeignKey(BlogType, on_delete=models.DO_NOTHING)
+    blog_type = models.ForeignKey(BlogType, on_delete=models.CASCADE)
     content = models.TextField()
-    author = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)
     last_updated_time = models.DateTimeField(auto_now=True)
 
@@ -795,8 +795,8 @@ return response
 ```py
 class ReadNum(models.Model):
     read_num = models.IntegerField(default=0)
-    blog = models.OneToOneField(Blog, on_delete=models.DO_NOTHING)
-    # 或者 blog = models.ForeignKey(Blog, on_delete=models.DO_NOTHING)
+    blog = models.OneToOneField(Blog, on_delete=models.CASCADE)
+    # 或者 blog = models.ForeignKey(Blog, on_delete=models.CASCADE)
 
 @admin.register(ReadNum)
 class ReadNumAdmin(admin.ModelAdmin):
@@ -836,7 +836,7 @@ from django.contrib.contenttypes.models import ContentType
 class ReadNum(models.Model):
     read_num = models.IntegerField(default=0)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 ```
@@ -889,7 +889,7 @@ class ReadDetail(models.Model):
     date = models.DateField(default=timezone.now)
     read_num = models.IntegerField(default=0)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
@@ -1094,13 +1094,13 @@ from django.contrib.auth.models import User
 
 class Comment(models.Model):
     # 下面3行用来关联任意类型
-    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
     text = models.TextField()
     comment_time = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 # admin
 from django.contrib import admin
@@ -1205,13 +1205,13 @@ def update_comment(request):
 ```py
 class Comment(models.Model):
     # 下面3行用来关联任意类型
-    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
     text = models.TextField()
     comment_time = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['-comment_time'] # 时间逆序，最新的在最前面
@@ -1707,11 +1707,11 @@ class Comment(models.Model):
     ...
     text = models.TextField()
     comment_time = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, related_name='comments', on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, related_name='comments', on_delete=models.CASCADE)
 
-    root = models.ForeignKey('self', related_name='root_comment', null=True, on_delete=models.DO_NOTHING)
-    parent = models.ForeignKey('self', related_name='parent_comment', null=True, on_delete=models.DO_NOTHING)
-    reply_to = models.ForeignKey(User, related_name='replies', null=True, on_delete=models.DO_NOTHING)
+    root = models.ForeignKey('self', related_name='root_comment', null=True, on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', related_name='parent_comment', null=True, on_delete=models.CASCADE)
+    reply_to = models.ForeignKey(User, related_name='replies', null=True, on_delete=models.CASCADE)
 
 ```
 
@@ -1833,6 +1833,7 @@ function reply(reply_comment_id){
     - 在模版中 `load` 标签加载该文件， `{% load comment_tags %}` 文件名去掉py
     - 模版中调用 `{% get_comment_count blog %}` 注意标签是`{% %}`, 参数也没有引号
     - 这样可以在详情和列表页轻松显示评论数，2句话，很简单
+    - [Custom template tags and filters](https://docs.djangoproject.com/en/2.0/howto/custom-template-tags/)
 
 ```py
 # 创建包，和文件
@@ -1921,3 +1922,9 @@ p#reply_title {
     padding-bottom: 0.5em;
 }
 ```
+
+- 外键级联删除CASCADE，保证数据的完整性
+    - `user = models.ForeignKey(User, related_name='comments', on_delete=models.DO_NOTHING)`
+    - `User表是主，当删除用户后，DO_NOTHING还会保留用户的评论里的用户，造成数据不完整`
+    - 数据库会提示，`FOREIGN KEY constraint failed`
+    - 换成 `on_delete=models.CASCADE`, 删除用户后，包含在评论里的用户也删除

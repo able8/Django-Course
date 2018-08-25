@@ -35,6 +35,7 @@ Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.
     - [24.使用Django Form表单](#24%E4%BD%BF%E7%94%A8django-form%E8%A1%A8%E5%8D%95)
     - [25.表单富文本编辑和ajax异步提交评论](#25%E8%A1%A8%E5%8D%95%E5%AF%8C%E6%96%87%E6%9C%AC%E7%BC%96%E8%BE%91%E5%92%8Cajax%E5%BC%82%E6%AD%A5%E6%8F%90%E4%BA%A4%E8%AF%84%E8%AE%BA)
     - [26.回复功能设计和树结构](#26%E5%9B%9E%E5%A4%8D%E5%8A%9F%E8%83%BD%E8%AE%BE%E8%AE%A1%E5%92%8C%E6%A0%91%E7%BB%93%E6%9E%84)
+    - [27.获取评论数和细节处理](#27%E8%8E%B7%E5%8F%96%E8%AF%84%E8%AE%BA%E6%95%B0%E5%92%8C%E7%BB%86%E8%8A%82%E5%A4%84%E7%90%86)
 
 ## 01.什么是Django
 
@@ -1816,4 +1817,39 @@ function reply(reply_comment_id){
         CKEDITOR.instances['id_text'].focus();
     });
 }
+```
+
+## 27.获取评论数和细节处理
+
+- 如何获取评论数
+    - 方法：filter筛选在用count方法计数
+    - 问题：在列表和详情页显示，会让代码变得很复杂
+    - 详情也有评论，是可以统计；列表页显示评论数就比较麻烦
+
+- 用自定义模板标签获取评论数
+    - 实现评论功能独立，降低耦合性，代码独立，使用简单
+    - 在app内创建 `templatetags` 包
+    - 创建py文件, 写方法，稍后会当标签使用, 注册方法后要重启应用
+    - 在模版中 `load` 标签加载该文件， `{% load comment_tags %}` 文件名去掉py
+    - 模版中调用 `{% get_comment_count blog %}` 注意标签是`{% %}`, 参数也没有引号
+    - 这样可以在详情和列表页轻松显示评论数，2句话，很简单
+
+```py
+# 创建包，和文件
+# Django_Course/mysite/comment/templatetags/comment_tags.py
+# vscode  cmd +k  p  复制当前文件的路径
+from django import template
+from django.contrib.contenttypes.models import ContentType
+from ..models import Comment
+
+register = template.Library()
+@register.simple_tag
+def get_comment_count(obj):
+    content_type = ContentType.objects.get_for_model(
+        obj)  # 根据具体对象获取contenttype
+    return Comment.objects.filter(
+        content_type=content_type, object_id=obj.pk).count()
+
+{% load comment_tags %}
+评论({% get_comment_count blog %}
 ```

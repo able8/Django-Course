@@ -2464,3 +2464,7 @@ class UserAdmin(BaseUserAdmin):
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 ```
+
+- 用Profile模型拓展User方法的优缺点
+    - 优点是使用方便，不用删库重来，不影响整体架构
+    - 缺点是存在不必要的字段，对比继承的方法，查询速度会稍微慢一丁点

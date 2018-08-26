@@ -39,6 +39,7 @@ Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.
     - [28.实现点赞功能, 看似简单，内容很多](#28%E5%AE%9E%E7%8E%B0%E7%82%B9%E8%B5%9E%E5%8A%9F%E8%83%BD-%E7%9C%8B%E4%BC%BC%E7%AE%80%E5%8D%95%E5%86%85%E5%AE%B9%E5%BE%88%E5%A4%9A)
     - [29.完善点赞功能](#29%E5%AE%8C%E5%96%84%E7%82%B9%E8%B5%9E%E5%8A%9F%E8%83%BD)
     - [30.导航栏添加用户操作](#30%E5%AF%BC%E8%88%AA%E6%A0%8F%E6%B7%BB%E5%8A%A0%E7%94%A8%E6%88%B7%E6%93%8D%E4%BD%9C)
+    - [31.自定义用户模型](#31%E8%87%AA%E5%AE%9A%E4%B9%89%E7%94%A8%E6%88%B7%E6%A8%A1%E5%9E%8B)
 
 ## 01.什么是Django
 
@@ -2403,4 +2404,38 @@ TEMPLATES = [
         },
     },
 ]
+```
+
+## 31.自定义用户模型
+
+- 两种自定义用户模型的方式
+    - 继承Django的User类
+        - 优点是 自定义强，没有不必要的字段
+        - 缺点是 需要在项目开始时使用，配置admin麻烦
+        - [Customizing authentication in Django](Customizing authentication in Django)
+    - 用新的Profile模型拓展关联的User
+
+- 用新的Profile模型拓展关联的User
+    - 创建models
+    - 创建admin后台
+    - 迁移数据库生效
+
+```py
+# Django_Course/mysite/user/models.py
+from django.db import models
+from django.contrib.auth.models import User
+class Profile(models.Model):
+    #一对一关系，一个用户一个资料， 重复会报错无法添加
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    nickname = models.CharField(max_length=20)
+
+    def __str__(self):
+        return '<Profile: %s for %s>' % (self.nickname, self.user.username)
+
+# Django_Course/mysite/user/admin.py
+from django.contrib import admin
+from .models import Profile
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'nickname')
 ```

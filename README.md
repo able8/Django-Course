@@ -2412,7 +2412,7 @@ TEMPLATES = [
     - 继承Django的User类
         - 优点是 自定义强，没有不必要的字段
         - 缺点是 需要在项目开始时使用，配置admin麻烦
-        - [Customizing authentication in Django](Customizing authentication in Django)
+        - [Customizing authentication in Django](https://docs.djangoproject.com/en/2.1/topics/auth/customizing/)
     - 用新的Profile模型拓展关联的User
 
 - 用新的Profile模型拓展关联的User
@@ -2438,4 +2438,29 @@ from .models import Profile
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'nickname')
+```
+
+- 将profile模型信息添加到admin后台的用户信息页面
+    - To add a profile model’s fields to the user page in the admin, define an InlineModelAdmin (for this example, we’ll use a StackedInline) in your app’s admin.py and add it to a UserAdmin class which is registered with the User class
+    - 在用户列表显示昵称
+
+```py
+# admin.py
+# Define an inline admin descriptor for Profile model
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+
+# Define a new User admin
+class UserAdmin(BaseUserAdmin):
+    inlines = (ProfileInline,)
+    list_display = ('username', 'nickname', 'email', 'is_staff', 'is_active', 'is_superuser')
+    # 为了在用户列表显示昵称，需要加入一个自定义方法。上面就是调用user.nickname显示
+    def nickname(self, obj):
+        return obj.profile.nickname
+    nickname.short_description = '昵称' # 中文显示
+
+# Re-register UserAdmin
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 ```

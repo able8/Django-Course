@@ -5,7 +5,7 @@ from django.db.models import Count
 from django.contrib.contenttypes.models import ContentType
 from .models import Blog, BlogType
 from read_statistics.utils import read_statistics_one_read
-from mysite.forms import LoginForm
+from user.forms import LoginForm
 
 
 def get_blog_list_common_date(request, blogs_all_list):

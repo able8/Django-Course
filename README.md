@@ -2361,3 +2361,15 @@ def user_info(request):
     context = {}
     return render(request, 'user_info.html', context)
 ```
+
+- 迁移，将user独立成app，放到一起
+    - 创建app可以用命令`python manage.py startapp appname`
+    - 也可以手动需要的文件，模拟命令, 再将文件分离出，放到app里面
+
+- 手动迁移user应用步骤
+    - 路由分离，总路由添加用户`path('user/', include('user.urls')),`
+    - user应用添加`urls.py`, 统一处理用户相关的 url
+    - user新建模版文件夹，将用户相关html放到里面的user目录，统一管理
+    - 修改views中加入`user／`
+    - 因为模版文件中用到的url都是别名，所有迁移不影响
+    - 最后在settings中注册app

@@ -10,11 +10,19 @@ body {
 ul {
     list-style: none;
 }
+
+ul.navbar-right {
+    margin-right: 20px;
+}
+
+ul.dropdown-menu {
+    min-width: 100px;
+}
 /* div.nav{
     background-color: #eee;
     border-bottom: 1px solid #ccc;
     padding: 10px 5px;
-    
+
 }
 div.nav a{
     text-decoration: none;

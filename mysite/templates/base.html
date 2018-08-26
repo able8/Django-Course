@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/static/base.css">
     <!-- <link rel="stylesheet" href="{% static 'base.css' %}"> -->
     <link rel="stylesheet" href="{% static 'bootstrap-3.3.7/css/bootstrap.min.css' %}">
- 
+
     {% block header_extends %}
     {% endblock header_extends %}
 </head>
@@ -32,13 +32,30 @@
                         <li class="{% block nav_blog_active%}{% endblock%}">
                         <a href="{% url 'blog_list' %}">博客</a></li>
                 </ul>
+
+                <ul class="nav navbar-nav navbar-right">
+                    {% if not user.is_authenticated %}
+                        <li><a href="{% url 'login' %}?from={{ request.get_full_path }}">登录</a></li>
+                        <li><a href="{% url 'register' %}?from={{ request.get_full_path }}">注册</a></li>
+                    {% else %}
+                        <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">{{ user.username }}
+                            <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'user_info' %}">个人资料</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="{% url 'logout' %}?from={{ request.get_full_path }}">退出</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
-    </div>    
+    </div>
 
     <script type="text/javascript" src="{% static 'jquery-1.12.4.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'bootstrap-3.3.7/js/bootstrap.min.js' %}"></script>
-    
+
     {% block content %}{% endblock content %}
     {% block script_extends %}{% endblock script_extends %}
 </body>

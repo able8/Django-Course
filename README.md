@@ -38,6 +38,7 @@ Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.
     - [27.获取评论数和细节处理](#27%E8%8E%B7%E5%8F%96%E8%AF%84%E8%AE%BA%E6%95%B0%E5%92%8C%E7%BB%86%E8%8A%82%E5%A4%84%E7%90%86)
     - [28.实现点赞功能, 看似简单，内容很多](#28%E5%AE%9E%E7%8E%B0%E7%82%B9%E8%B5%9E%E5%8A%9F%E8%83%BD-%E7%9C%8B%E4%BC%BC%E7%AE%80%E5%8D%95%E5%86%85%E5%AE%B9%E5%BE%88%E5%A4%9A)
     - [29.完善点赞功能](#29%E5%AE%8C%E5%96%84%E7%82%B9%E8%B5%9E%E5%8A%9F%E8%83%BD)
+    - [30.导航栏添加用户操作](#30%E5%AF%BC%E8%88%AA%E6%A0%8F%E6%B7%BB%E5%8A%A0%E7%94%A8%E6%88%B7%E6%93%8D%E4%BD%9C)
 
 ## 01.什么是Django
 
@@ -2291,4 +2292,72 @@ def login_for_modal(request):
     else:
         data['status'] = 'ERROR'
     return JsonResponse(data)
+```
+
+## 30.导航栏添加用户操作
+
+- 之前评论和点赞的时候，需要登录和登出，操作有点麻烦。所以在导航栏添加用户操作，并且将相关用户的处理方法集中变成一个django应用，为后面自定义用户模型准备
+
+- 方便登录和退出
+    - 导航栏右侧添加“登录／注册”，用户个人信息，退出功能
+    - [下拉导航条](https://v3.bootcss.com/components/#navbar-default)
+    - [User model  django.contrib.auth](https://docs.djangoproject.com/en/2.1/ref/contrib/auth/)
+
+```js
+// 登录状态显示用户名，未登录状态显示登录和注册
+ <ul class="nav navbar-nav navbar-right">
+    {% if not user.is_authenticated %}
+        <li><a href="{% url 'login' %}?from={{ request.get_full_path }}">登录</a></li>
+        <li><a href="{% url 'register' %}?from={{ request.get_full_path }}">注册</a></li>
+    {% else %}
+        <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">{{ user.username }}
+            <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="{% url 'user_info' %}">个人资料</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="{% url 'logout' %}?from={{ request.get_full_path }}">退出</a></li>
+        </ul>
+    </li>
+    {% endif %}
+</ul>
+
+// 用户中心页面
+<div class="containter">
+    <div class="row">
+        <div class="col-xs-10 col-xs-offset-1">
+            {% if user.is_authenticated %}
+            <h2>{{ user.username }}</h2>
+            <ul>
+                <li>昵称： <a href="#">修改昵称</a></li>
+                <li>邮箱：
+                    {% if user.email %} {{ user.email }}
+                    {% else %} 未绑定 <a href="#">绑定邮箱</a>
+                    {% endif %}</li>
+                <li>上次登录的时间: {{ user.last_login|date:"Y-m-d H:i:s" }}</li>
+                <li><a href="#">修改密码</a></li>
+            </ul>
+            {% else %}
+                <span>未登录，跳转到首页....</span>
+                <script type="text/javascript">
+                    window.location.href = '/';
+                </script>
+            {% endif %}
+        </div>
+    </div>
+</div>
+```
+
+```py
+# 注册用户中心url
+path('user_info/', views.user_info, name='user_info'),
+
+# 处理退出和用户中心请求
+def logout(request):
+    auth.logout(request)
+    return redirect(request.GET.get('from', reverse('home')))
+
+def user_info(request):
+    context = {}
+    return render(request, 'user_info.html', context)
 ```

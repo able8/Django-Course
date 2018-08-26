@@ -23,9 +23,8 @@
                 <div class="panel-body">
                     <form action="" method="POST">
                         {% csrf_token %}
-                        {% comment %} {{ login_form }} 定制显示 {% endcomment %}
                         {% for field in login_form %}
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            <label for="field.id_for_label">{{ field.label }}</label>
                             {{ field }}
                             <p class="text-danger">
                                 {{ field.errors.as_text }}

@@ -2468,3 +2468,31 @@ admin.site.register(User, UserAdmin)
 - 用Profile模型拓展User方法的优缺点
     - 优点是使用方便，不用删库重来，不影响整体架构
     - 缺点是存在不必要的字段，对比继承的方法，查询速度会稍微慢一丁点
+
+- 加入调整 `后台管理` 链接
+
+```js
+<ul class="dropdown-menu">
+    <li><a href="{% url 'user_info' %}">个人资料</a></li>
+    <li role="separator" class="divider"></li>
+    {% if user.is_staff or user.is_superuser %}
+    <li><a href="{% url 'admin:index' %}">后台管理</a></li>  // admin是命名空间
+    {% endif %}
+    <li><a href="{% url 'logout' %}?from={{ request.get_full_path }}">退出</a></li>
+</ul>
+```
+
+- 优化 登录和主页 页面逻辑，如果是登录状态，就调整到首页
+
+```js
+{% if not user.is_authenticated %}
+
+    ... 注册或登录
+
+{% else %}
+<span>已登录，跳转到首页....</span>
+<script type="text/javascript">
+    window.location.href = '/';
+</script> {% endif %}
+{% endif %}
+```

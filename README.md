@@ -2373,3 +2373,34 @@ def user_info(request):
     - 修改views中加入`user／`
     - 因为模版文件中用到的url都是别名，所有迁移不影响
     - 最后在settings中注册app
+
+- 将登录表单和弹出的登录框放到公共模版里，独立出来，方便调用
+    - user目录下新建 `context_processors.py`
+    - settings 中的 TEMPLATES 添加
+    - 将之前views中引用的去掉，可以在模版中直接引用了
+    - 将登录弹框和ajax脚本分离独立出来，放到公共的`base.html`文件中，随处可用
+
+```py
+# Django_Course/mysite/user/context_processors.py
+from .forms import LoginForm
+
+def login_modal_form(request):
+    return {'login_modal_form': LoginForm()}
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                ...
+                'django.template.context_processors.request',
+                'user.context_processors.login_modal_form',
+            ],
+        },
+    },
+]
+```

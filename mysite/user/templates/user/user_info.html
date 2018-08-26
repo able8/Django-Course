@@ -15,7 +15,7 @@
             {% if user.is_authenticated %}
             <h2>{{ user.username }}</h2>
             <ul>
-                <li>昵称： <a href="#">修改昵称</a></li>
+                <li>昵称： {{ user.get_nickname }} <a href="{% url 'change_nickname' %}">修改昵称</a></li>
                 <li>邮箱：
                     {% if user.email %} {{ user.email }}
                     {% else %} 未绑定 <a href="#">绑定邮箱</a>

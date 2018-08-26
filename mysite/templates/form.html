@@ -3,9 +3,7 @@
 
 {% block nav_home_active %}active{% endblock %}
 
-{% block title %}
-    我的网站|注册
-{% endblock title %}
+{% block title %} {{ page_title }} {% endblock title %}
 {% block header_extends %}
     <link rel="stylesheet" href="{% static 'home.css' %}">
     <script src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
@@ -15,27 +13,33 @@
 <div class="containter">
     <div class="row">
         <div class="col-xs-4 col-xs-offset-4">
-    
+
+
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">注册</h3>
+                    <h3 class="panel-title">{{ form_title }}</h3>
                 </div>
                 <div class="panel-body">
                     <form action="" method="POST">
                         {% csrf_token %}
-                        {% comment %} {{ login_form }} 定制显示 {% endcomment %}
-                        {% for field in reg_form %}
+                        {% for field in form %}
+                        {% if not field.is_hidden %}
                             <label for="field.id_for_label">{{ field.label }}</label>
+                        {% endif %}
                             {{ field }}
                             <p class="text-danger">
                                 {{ field.errors.as_text }}
                             </p>
                         {% endfor %}
-                        <span class="pull-left text-danger">{{ reg_form.non_field_errors }}</span>
-                        <input type="submit" value="登录" class="btn btn-primary pull-right">
+                        <span class="pull-left text-danger">{{ form.non_field_errors }}</span>
+                        <div class="pull-right">
+                            <input type="submit" value="{{ submit_text }}" class="btn btn-primary">
+                            <button class="btn btn-default" onclick="{{ return_back_url }}">返回</button>
+                        </div>
                     </form>
                 </div>
             </div>
+
 
         </div>
     </div>

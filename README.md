@@ -40,6 +40,7 @@ Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.
     - [29.完善点赞功能](#29%E5%AE%8C%E5%96%84%E7%82%B9%E8%B5%9E%E5%8A%9F%E8%83%BD)
     - [30.导航栏添加用户操作](#30%E5%AF%BC%E8%88%AA%E6%A0%8F%E6%B7%BB%E5%8A%A0%E7%94%A8%E6%88%B7%E6%93%8D%E4%BD%9C)
     - [31.自定义用户模型](#31%E8%87%AA%E5%AE%9A%E4%B9%89%E7%94%A8%E6%88%B7%E6%A8%A1%E5%9E%8B)
+    - [32.修改用户信息](#32%E4%BF%AE%E6%94%B9%E7%94%A8%E6%88%B7%E4%BF%A1%E6%81%AF)
 
 ## 01.什么是Django
 
@@ -2495,4 +2496,137 @@ admin.site.register(User, UserAdmin)
     window.location.href = '/';
 </script> {% endif %}
 {% endif %}
+```
+
+## 32.修改用户信息
+
+- 修改用户信息，实现修改昵称、绑定邮箱（可发送邮件功能）
+
+- 实现修改昵称
+    - 前端页面添加 修改昵称 链接 `<a href="{% url 'change_nickname' %}">修改昵称</a>`
+    - urls 中添加 链接，和对应的处理方法 `path('change_nickname/', views.change_nickname, name='change_nickname'),`
+    - views 中添加 渲染页面和修改昵称处理方法
+    - 渲染修改昵称表单，需要定义一个 修改昵称 的表单，
+    - 添加 form.html 用来 显示表单和提交信息
+
+```js
+<form action="" method="POST">
+    {% csrf_token %}
+    {% for field in form %}
+        {% if not field.is_hidden %}
+            <label for="field.id_for_label">{{ field.label }}</label>
+        {% endif %}
+        {{ field }}
+        <p class="text-danger"> {{ field.errors.as_text }} </p>
+    {% endfor %}
+    <span class="pull-left text-danger">{{ form.non_field_errors }}</span>
+    <div class="pull-right">
+        <input type="submit" value="{{ submit_text }}" class="btn btn-primary">
+        <button class="btn btn-default" onclick="{{ return_back_url }}">返回</button>
+    </div>
+</form>
+```
+
+```py
+# form.py  定义表单和验证表单的方法
+class ChangeNicknameForm(forms.Form):
+    nickname_new = forms.CharField(
+        label='新的昵称',
+        max_length=20,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '请输入新的昵称'
+        }))
+
+    # 下面2个函数用于判断用户是否登录
+    def __init__(self, *args, **kwargs):
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')  # 接收用户信息, 并剔除，为了下一句不出错
+        super(ChangeNicknameForm, self).__init__(*args, **kwargs)
+
+    # 验证数据
+    def clean(self):
+        # 判断用户是否登录
+        if self.user.is_authenticated:
+            self.cleaned_data['user'] = self.user
+        else:
+            raise forms.ValidationError('用户尚未登录')
+        return self.cleaned_data
+
+    def clean_nickname_new(self):
+        nickname_new = self.cleaned_data.get('nickname_new', '').strip()
+        if nickname_new == '':
+            raise forms.ValidationError('新的昵称不能为空')
+        return nickname_new
+
+# views.py 处理
+def change_nickname(request):
+    redirect_to = request.GET.get('from', reverse('home'))
+    if request.method == 'POST':
+        form = ChangeNicknameForm(request.POST, user=request.user)
+        if form.is_valid():
+            nickname_new = form.cleaned_data['nickname_new']
+            profile, created = Profile.objects.get_or_create(user=request.user)
+            profile.nickname = nickname_new
+            profile.save()
+            return redirect(redirect_to)
+    else:
+        form = ChangeNicknameForm()
+
+    context = {}
+    context['page_title'] = '修改昵称'
+    context['form_title'] = '修改昵称'
+    context['submit_text'] = '修改'
+    context['form'] = form
+    context['return_back_url'] = redirect_to
+    return render(request, 'form.html', context)
+```
+
+- 如何判断显示用户名和昵称
+    - 给user类添加获取昵称的类方法，获取昵称，是否有昵称，获得昵称或用户名
+
+
+```py
+# 使用类方法的动态绑定，User类绑定获取昵称的方法
+def get_nickname(self):
+    if Profile.objects.filter(user=self).exists():
+        profile = Profile.objects.get(user=self)
+        return profile.nickname
+    else:
+        return ''
+
+def get_nickname_or_username(self):
+    if Profile.objects.filter(user=self).exists():
+        profile = Profile.objects.get(user=self)
+        return profile.nickname
+    else:
+        return self.username
+
+def has_nickname(self):
+    return Profile.objects.filter(user=self).exists()
+
+User.get_nickname = get_nickname
+User.has_nickname = has_nickname
+User.get_nickname_or_username = get_nickname_or_username
+
+```
+
+```js
+// base.html
+<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+    {% if user.has_nickname %}
+    {{ user.username }}({{ user.get_nickname }})
+    {% else %}
+    {{ user.username }}
+    {% endif %}
+<span class="caret"></span></a>
+
+// blog_detail.html  评论
+<label>{{ user.get_nickname_or_username }}，欢迎评论～</label>
+
+// 还有 ajax 中，前面views返回的方法需要修改，得到昵称再直接返回昵称
+data['status'] = 'SUCCESS'
+    data['username'] = comment.user.get_nickname_or_username()
+    if parent is not None:
+        data['reply_to'] = comment.reply_to.get_nickname_or_username()
 ```

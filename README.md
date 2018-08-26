@@ -2630,3 +2630,198 @@ data['status'] = 'SUCCESS'
     if parent is not None:
         data['reply_to'] = comment.reply_to.get_nickname_or_username()
 ```
+
+- 实现绑定邮箱功能
+    - 先思考绑定邮箱需要哪些字段，邮箱地址和验证码
+    - 设计绑定邮箱的表单
+    - views 中引入表单，添加处理方法
+    - 添加路由
+    - 前端页面添加链接
+    - [Sending email](https://docs.djangoproject.com/en/2.1/topics/email/) 设置发件邮箱
+    - QQ 邮箱 开启设置 SMTP 服务。 改QQ密码后授权码会实效
+    - 表单验证信息
+    - ajax 发送验证码
+    - views 处理 绑定邮箱和发送验证码
+
+- 邮箱设置
+
+```py
+# 发送邮件设置
+# https://docs.djangoproject.com/en/2.0/ref/settings/#email
+# https://docs.djangoproject.com/en/2.0/topics/email/
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.qq.com'
+EMAIL_PORT = '25'
+EMAIL_HOST_USER = '2@qq.com'
+EMAIL_HOST_PASSWORD = 's'  # 授权码
+EMAIL_SUBJECT_PREFIX = '[able的博客]'
+EMAIL_USE_TLS = True # 与smtp服务器通信时，是否启动TLS链接  安全链接
+```
+
+- 绑定邮箱的表单，即各种表单验证
+
+```py
+class BindEmailForm(forms.Form):
+    email = forms.EmailField(
+        label='邮箱',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '请输入正确的邮箱'
+        }))
+    verification_code = forms.CharField(
+        label='验证码',
+        required=False,  # 为了在不填的时候可以点击发送邮件
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '点击“发送验证码”发送到邮箱'
+        }))
+
+    # 下面2个函数用于判断用户是否登录
+    def __init__(self, *args, **kwargs):
+        if 'request' in kwargs:
+            self.request = kwargs.pop('request')  # 接收传入的rquest信息, 并剔除，为了下一句不出错
+        super(BindEmailForm, self).__init__(*args, **kwargs)
+
+    # 验证数据
+    def clean(self):
+        # 判断用户是否登录
+        if self.request.user.is_authenticated:
+            self.cleaned_data['user'] = self.request.user
+        else:
+            raise forms.ValidationError('用户尚未登录')
+
+        # 判断用户数会否已经绑定邮箱
+        if self.request.user.email != '':
+            raise forms.ValidationError('你已经绑定了邮箱')
+
+        # 判断验证码
+        code = self.request.session.get('bind_email_code', '')
+        verification_code = self.cleaned_data.get('verification_code', '')
+        if not (code != '' and code == verification_code):
+            raise forms.ValidationError('验证码不正确')
+        return self.cleaned_data
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('该邮箱已经被绑定')
+        return email
+
+    def clean_verification_code(self):
+        verification_code = self.cleaned_data.get('verification_code',
+                                                  '').strip()
+        if verification_code == '':
+            raise forms.ValidationError('验证码不能为空')
+        return verification_code
+```
+
+- views 处理 绑定邮箱和发送验证码
+
+```py
+# 路由
+path('bind_email/', views.bind_email, name='bind_email'),
+path('send_verification_code/', views.send_verification_code, name='send_verification_code'),
+
+def bind_email(request):
+    redirect_to = request.GET.get('from', reverse('home'))
+    if request.method == 'POST':
+        form = BindEmailForm(request.POST, request=request)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            request.user.email = email
+            request.user.save()
+            return redirect(redirect_to)
+    else:
+        form = BindEmailForm()
+
+    context = {}
+    context['page_title'] = '绑定邮箱'
+    context['form_title'] = '绑定邮箱'
+    context['submit_text'] = '绑定'
+    context['form'] = form
+    context['return_back_url'] = redirect_to
+    return render(request, 'user/bind_email.html', context)
+
+def send_verification_code(request):
+    email = request.GET.get('email', '')
+    data = {}
+
+    if email != '':
+        # 生成验证码
+        code = ''.join(random.sample(string.digits, 6))
+
+        now = int(time.time())  # 秒数
+        send_code_time = request.session.get('send_code_time', 0)
+        if now - send_code_time < 60:
+            data['status'] = 'ERROR'
+        else:
+            # session 存储用户请求信息，默认有效期两周
+            request.session['bind_email_code'] = code
+            request.session['send_code_time'] = now
+            # 发送邮箱
+            send_mail(
+                '绑定邮箱',
+                '验证码: %s' % code,
+                '2@qq.com',
+                [email],
+                fail_silently=False,
+            )
+            data['status'] = 'SUCCESS'
+    else:
+        data['status'] = 'ERROR'
+    return JsonResponse(data)
+```
+
+- 绑定邮箱前端页面和ajax发送验证码
+
+```js
+{% extends "form.html" %}
+
+{% block other_buttons %}
+    <button id="send_code" class="btn btn-primary">发送验证码</button>
+{% endblock other_buttons %}
+
+{% block script_extends %}
+<script type="text/javascript">
+    $('#send_code').click(function(){
+        var email = $('#id_email').val(); // 拿到用户填的邮箱的 值
+        if(email == ''){
+            $('#tip').text('* 邮箱不能为空')
+            return false;
+        }
+
+        // ajax 异步发送验证码
+        $.ajax({
+            url: "{% url 'send_verification_code' %}",
+            type: 'GET',
+            data: {
+                'email': email
+            },
+            cache: false,
+            success: function(data){
+                if(data['status'] == 'ERROR'){
+                    alert(data['status']);
+                }
+            }
+        });
+        // 把按钮变灰
+        $(this).addClass('disabled');
+        $(this).attr('disabled', true);
+        var time = 60;
+        $(this).text(time + 's 后重新发送');
+        var interval = setInterval(() => {
+            if(time <= 0){
+                clearInterval(interval);
+                $(this).removeClass('disabled');
+                $(this).attr('disabled', false);
+                $(this).text('发送验证码');
+                return false;
+            }
+            time --;
+            $(this).text(time + 's 后重新发送');
+        }, 1000);
+    });
+</script>
+{% endblock script_extends %}
+```

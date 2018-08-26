@@ -31,7 +31,11 @@
                                 {{ field.errors.as_text }}
                             </p>
                         {% endfor %}
-                        <span class="pull-left text-danger">{{ form.non_field_errors }}</span>
+                        <span id="tip" class="text-danger">{{ form.non_field_errors }}</span>
+                        <div class="clearfix"></div> <!-- 可以浮动显示错误信息 -->
+                        <div class="pull-left">
+                            {% block other_buttons %} {% endblock other_buttons %}
+                        </div>
                         <div class="pull-right">
                             <input type="submit" value="{{ submit_text }}" class="btn btn-primary">
                             <button class="btn btn-default" onclick="{{ return_back_url }}">返回</button>

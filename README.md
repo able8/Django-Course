@@ -2910,3 +2910,55 @@ if email != '':
     send_mail( subject, text, settings.EMAIL_HOST_USER, [email],
         fail_silently=False,)
 ```
+
+- 异步发送邮件
+    - 因为发送邮件需要点时间，要稍微等一下才继续运行下面程序，所以需要异步发送
+    - 简单方案，多线程，简单、实现
+    - 复杂方案，Celery
+        - 可以防止任务过多
+        - 可定时执行一些任务
+        - 开销更大
+
+```py
+# 多线程发送邮件
+# Django_Course/mysite/comment/models.py
+class SendMail(threading.Thread):
+    def __init__(self, subject, text, email, fail_silently=False):
+        self.subject = subject
+        self.text = text
+        self.email = email
+        self.fail_silently = fail_silently
+        threading.Thread.__init__(self)
+
+    def run(self):
+        send_mail(
+            self.subject,
+            '',
+            settings.EMAIL_HOST_USER,
+            [self.email],
+            fail_silently=self.fail_silently,
+            html_message=self.text
+        )
+...
+if email != '':
+    context = {}
+    context['comment_text'] = self.text
+    context['url'] = self.content_object.get_url()
+    text = render_to_string('comment/send_mail.html', context)
+    send_comment_thread = SendMail(subject, text, email)
+    send_comment_thread.start()
+```
+
+- html邮件模版
+    - 可以发送html邮件，`html_message`字段
+    - 在commment应用下面新建`templates/comment/send_mail.html`
+    - 加上应用名，是为了方便应用的迁移，防止冲突
+    - 因为 `self.text` 是表单字段，会含有`<p>`标签，所以模版里需要加`safe`过滤掉
+    - {{comment_text|safe}}，这样传过去的没有html标签了
+
+```js
+//Django_Course/mysite/comment/templates/comment/send_mail.html
+{{ comment_text | safe }}
+<br>
+<a href="{{ url }}">点击查看</a>
+```

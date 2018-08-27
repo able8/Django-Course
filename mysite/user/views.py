@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.core.mail import send_mail
 from django.urls import reverse
+from django.conf import settings
 from .forms import LoginForm, RegForm, ChangeNicknameForm, BindEmailForm
 from .models import Profile
 
@@ -41,7 +42,7 @@ def login_for_modal(request):
 
 def register(request):
     if request.method == 'POST':
-        reg_form = RegForm(request.POST)
+        reg_form = RegForm(request.POST, request=request)
         if reg_form.is_valid():
             username = reg_form.cleaned_data['username']
             password = reg_form.cleaned_data['password']
@@ -49,6 +50,8 @@ def register(request):
             # 创建用户
             user = User.objects.create_user(username, email, password)
             user.save()
+            # 清除session, 不清楚的话就可以一个验证码多次注册了
+            del  request.session['register_code']
             # 或者
             '''
             user = User()
@@ -110,6 +113,8 @@ def bind_email(request):
             email = form.cleaned_data['email']
             request.user.email = email
             request.user.save()
+            # 清除session, 不清楚的话就可以一个验证码多次注册了
+            del request.session['bind_email_code']
             return redirect(redirect_to)
     else:
         form = BindEmailForm()
@@ -125,6 +130,7 @@ def bind_email(request):
 
 def send_verification_code(request):
     email = request.GET.get('email', '')
+    send_for = request.GET.get('send_for', '')
     data = {}
 
     if email != '':
@@ -137,13 +143,13 @@ def send_verification_code(request):
             data['status'] = 'ERROR'
         else:
             # session 存储用户请求信息，默认有效期两周
-            request.session['bind_email_code'] = code
+            request.session[send_for] = code
             request.session['send_code_time'] = now
             # 发送邮箱
             send_mail(
-                '绑定邮箱',
+                '验证您的电子邮件地址',
                 '验证码: %s' % code,
-                '2@qq.com',
+                settings.EMAIL_HOST_USER,
                 [email],
                 fail_silently=False,
             )

@@ -43,27 +43,47 @@ class RegForm(forms.Form):
             'class': 'form-control',
             'placeholder': '请输入3-30位用户名'
         }))
-    email = forms.EmailField(
-        label='邮箱',
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': '请输入邮箱'
-        }))
-
     password = forms.CharField(
-        label='密码',
+        label='设置密码',
         min_length=6,
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
             'placeholder': '请输入密码'
         }))
     password_again = forms.CharField(
-        label='密码',
+        label='确认密码',
         min_length=6,
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
             'placeholder': '再输入一次密码'
         }))
+    email = forms.EmailField(
+        label='邮箱',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '请输入邮箱'
+        }))
+    verification_code = forms.CharField(
+        label='验证码',
+        required=False,  # 为了在不填的时候可以点击发送邮件
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '点击“发送验证码”发送到邮箱'
+        }))
+
+    def __init__(self, *args, **kwargs):
+        if 'request' in kwargs:
+            self.request = kwargs.pop('request')  # 接收传入的rquest信息, 并剔除，为了下一句不出错
+        super(RegForm, self).__init__(*args, **kwargs)
+
+    # 验证数据
+    def clean(self):
+        # 判断验证码
+        code = self.request.session.get('register_code', '')
+        verification_code = self.cleaned_data.get('verification_code', '')
+        if not (code != '' and code == verification_code):
+            raise forms.ValidationError('验证码不正确')
+        return self.cleaned_data
 
     # 验证数据, 是否有效，是否存在
     def clean_username(self):

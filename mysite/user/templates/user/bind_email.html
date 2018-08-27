@@ -18,7 +18,8 @@
             url: "{% url 'send_verification_code' %}",
             type: 'GET',
             data: {
-                'email': email
+                'email': email,
+                'send_for': 'bind_email_code',
             },
             cache: false,
             success: function(data){

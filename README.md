@@ -42,6 +42,7 @@ Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.
     - [31.自定义用户模型](#31%E8%87%AA%E5%AE%9A%E4%B9%89%E7%94%A8%E6%88%B7%E6%A8%A1%E5%9E%8B)
     - [32.修改用户信息](#32%E4%BF%AE%E6%94%B9%E7%94%A8%E6%88%B7%E4%BF%A1%E6%81%AF)
     - [33.发挥邮箱的作用](#33%E5%8F%91%E6%8C%A5%E9%82%AE%E7%AE%B1%E7%9A%84%E4%BD%9C%E7%94%A8)
+    - [34.评论发送邮件通知](#34%E8%AF%84%E8%AE%BA%E5%8F%91%E9%80%81%E9%82%AE%E4%BB%B6%E9%80%9A%E7%9F%A5)
 
 ## 01.什么是Django
 
@@ -2875,3 +2876,37 @@ class LoginForm(forms.Form):
 - 忘记密码，发送邮件验证，修改密码
 
 - fix bug 注意清除session中的验证码
+
+## 34.评论发送邮件通知
+
+- 利用邮件提高访问量
+    - 进一步发挥邮箱作用
+    - 一旦被评论（回复）了，发送邮件通知，让用户再次访问网站
+
+```py
+# 添加获取邮箱和url的方法 Django_Course/mysite/blog/models.py
+class Blog(models.Model, ReadNumExpandMethod):  # 继承 方法
+    ...
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def get_url(self):
+        return reverse('blog_detail', kwargs={'blog_pk': self.pk})
+
+    def get_email(self):
+        return self.author.email
+
+# 发送邮件通知
+if comment.parent is None:
+    # 评论我的博客
+    # 发送邮箱
+    subject = '有人评论你的博客'
+    email = comment.content_object.get_email()
+else:
+    # 回复评论
+    subject = '有人回复你的博客'
+    email = comment.reply_to.email
+if email != '':
+    text = comment.text + '\n' + comment.content_object.get_url()
+    send_mail( subject, text, settings.EMAIL_HOST_USER, [email],
+        fail_silently=False,)
+```

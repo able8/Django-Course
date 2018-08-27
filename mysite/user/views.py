@@ -51,7 +51,7 @@ def register(request):
             user = User.objects.create_user(username, email, password)
             user.save()
             # 清除session, 不清楚的话就可以一个验证码多次注册了
-            del  request.session['register_code']
+            del request.session['register_code']
             # 或者
             '''
             user = User()

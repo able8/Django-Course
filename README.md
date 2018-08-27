@@ -2841,3 +2841,25 @@ def send_verification_code(request):
     - 也可以不要去填邮箱，建议绑定后不可解绑
 
 - 修改登录方式，用户名和邮箱都可以登录
+    - 修改登录表单的数据验证方式
+
+```py
+# Django_Course/mysite/user/forms.py
+class LoginForm(forms.Form):
+    ...
+    def clean(self):
+        username_or_email = self.cleaned_data['username_or_email']
+        password = self.cleaned_data['password']
+        user = auth.authenticate(username_or_email=username_or_email, password=password)
+        if user is None:
+            if User.objects.filter(email=username_or_email).exists():
+                username = User.objects.get(email=username_or_email).username
+                user = auth.authenticate(username=username, password=password)
+                if user is not None:
+                    self.cleaned_data['user'] = user
+                    return self.cleaned_data
+            raise forms.ValidationError('用户名或密码错误')
+        else:
+            self.cleaned_data['user'] = user
+        return self.cleaned_data
+```

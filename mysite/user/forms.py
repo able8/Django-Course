@@ -5,12 +5,12 @@ from django.contrib.auth.models import User
 
 # 定制登录表单
 class LoginForm(forms.Form):
-    username = forms.CharField(
-        label='用户名',
+    username_or_email = forms.CharField(
+        label='用户名或邮箱',
         required=True,  # 默认为True
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': '请输入用户名'
+            'placeholder': '请输入用户名或邮箱'
         }))
     # 设置渲染后的html的属性
 
@@ -23,10 +23,16 @@ class LoginForm(forms.Form):
 
     # 验证数据方法
     def clean(self):
-        username = self.cleaned_data['username']
+        username_or_email = self.cleaned_data['username_or_email']
         password = self.cleaned_data['password']
-        user = auth.authenticate(username=username, password=password)
+        user = auth.authenticate(username_or_email=username_or_email, password=password)
         if user is None:
+            if User.objects.filter(email=username_or_email).exists():
+                username = User.objects.get(email=username_or_email).username
+                user = auth.authenticate(username=username, password=password)
+                if user is not None:
+                    self.cleaned_data['user'] = user
+                    return self.cleaned_data
             raise forms.ValidationError('用户名或密码错误')
         else:
             self.cleaned_data['user'] = user

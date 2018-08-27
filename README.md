@@ -43,6 +43,10 @@ Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.
     - [32.修改用户信息](#32%E4%BF%AE%E6%94%B9%E7%94%A8%E6%88%B7%E4%BF%A1%E6%81%AF)
     - [33.发挥邮箱的作用](#33%E5%8F%91%E6%8C%A5%E9%82%AE%E7%AE%B1%E7%9A%84%E4%BD%9C%E7%94%A8)
     - [34.评论发送邮件通知](#34%E8%AF%84%E8%AE%BA%E5%8F%91%E9%80%81%E9%82%AE%E4%BB%B6%E9%80%9A%E7%9F%A5)
+    - [35.部署准备（一）：Git](#35%E9%83%A8%E7%BD%B2%E5%87%86%E5%A4%87%E4%B8%80git)
+    - [36.部署准备（二）：MySQL](#36%E9%83%A8%E7%BD%B2%E5%87%86%E5%A4%87%E4%BA%8Cmysql)
+    - [37.部署准备（三）：服务器](#37%E9%83%A8%E7%BD%B2%E5%87%86%E5%A4%87%E4%B8%89%E6%9C%8D%E5%8A%A1%E5%99%A8)
+    - [38.用Apache+mod_wsgi部署](#38%E7%94%A8apachemodwsgi%E9%83%A8%E7%BD%B2)
 
 ## 01.什么是Django
 
@@ -2955,10 +2959,57 @@ if email != '':
     - 加上应用名，是为了方便应用的迁移，防止冲突
     - 因为 `self.text` 是表单字段，会含有`<p>`标签，所以模版里需要加`safe`过滤掉
     - {{comment_text|safe}}，这样传过去的没有html标签了
+    - html 让邮件更好看，但也容易为判为垃圾邮件
 
 ```js
-//Django_Course/mysite/comment/templates/comment/send_mail.html
+// Django_Course/mysite/comment/templates/comment/send_mail.html
 {{ comment_text | safe }}
 <br>
 <a href="{{ url }}">点击查看</a>
+
+// 或者
+{% autoescape off %}
+{{ comment_text | safe }}
+<br>
+<a href="{{ url }}">点击查看</a>
+{% autoescape%}
 ```
+
+- 部署到互联网
+    - 服务器
+    - 域名
+    - 数据库，MySQL 开源 免费 好用
+    - 更新代码，版本控制 Git
+
+## 35.部署准备（一）：Git
+
+- Git 是一款开源的分布式版本控制系统
+    - 随着敲代码和修改代码，我们的代码会更新很多版本，不肯能复制好多份文件
+    - 就需要版本控制系统，管理代码版本
+    - [分布式 对比 集中式](https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/001374027586935cf69c53637d8458c9aec27dd546a6cd6000)
+    - 快速控制服务器代码版本
+    - 有利于团队协作
+
+- Git 命令
+    - 未追踪Untracked -> tracked 工作区 working dir -> 暂存区 staging area -> 本地仓库localrepo
+    - HEAD指向的版本就是当前版本
+    - Git允许我们在版本的历史之间穿梭，使用命令`git reset commit_id`
+    - 穿梭前，用`git log`可以查看提交历史，以便确定要回退到哪个版本
+    - 要重返未来，用`git reflog`查看命令历史，以便确定要回到未来的哪个版本
+    - `git clean` 影响untracked的文件，`git reset`影响tracked的文件
+    - `git clean`命令用来从你的工作目录中删除所有没有tracked过的文件
+    - `git reset` 只影响被track过的文件
+    - `git clean -n`是一次clean的演习, 告诉你哪些文件会被删除, 只是一个提醒
+    - `git clean -df`删除当前目录下没有被track过的 文件和文件夹
+    - `git clean -f` 删除当前目录下所有没有track过的文件. 他不会删除.gitignore文件里面指定的文件夹和文件, 不管这些文件有没有被track过
+    - `git clean -f <path>` 删除指定路径下的没有被track过的文件
+    - `git clean -xf` 删除当前目录下所有没有track过的文件 和文件夹 . 不管他是否是.gitignore文件里面指定的文件夹和文件
+    - `git reset commit_id` 只影响暂存区，将暂存修改的文件放到到工作区。 Resets the index but not the working tree (i.e., the changed files are preserved but not marked for commit) and reports what has not been updated.
+    - `git reset --soft commit_id` 无害，不丢失更改。重置版本指向，不影响 工作区和暂存区 文件更改 Does not touch the index file or the working tree at all
+    - `git reset --hard commit_id` 危险，会丢失更改。回退重置 工作区 和 暂存区，丢失tracked文件的更改! Resets the index and working tree. Any changes to tracked files in the working tree since commit are discarded.
+
+## 36.部署准备（二）：MySQL
+
+## 37.部署准备（三）：服务器
+
+## 38.用Apache+mod_wsgi部署

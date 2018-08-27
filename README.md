@@ -2871,3 +2871,7 @@ class LoginForm(forms.Form):
     - 添加修改密码表单
     - 添加views处理逻辑
     - 添加url
+
+- 忘记密码，发送邮件验证，修改密码
+
+- fix bug 注意清除session中的验证码

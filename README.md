@@ -2586,7 +2586,6 @@ def change_nickname(request):
 - 如何判断显示用户名和昵称
     - 给user类添加获取昵称的类方法，获取昵称，是否有昵称，获得昵称或用户名
 
-
 ```py
 # 使用类方法的动态绑定，User类绑定获取昵称的方法
 def get_nickname(self):
@@ -2850,7 +2849,7 @@ class LoginForm(forms.Form):
     def clean(self):
         username_or_email = self.cleaned_data['username_or_email']
         password = self.cleaned_data['password']
-        user = auth.authenticate(username_or_email=username_or_email, password=password)
+        user = auth.authenticate(username=username_or_email, password=password)
         if user is None:
             if User.objects.filter(email=username_or_email).exists():
                 username = User.objects.get(email=username_or_email).username
@@ -2863,3 +2862,12 @@ class LoginForm(forms.Form):
             self.cleaned_data['user'] = user
         return self.cleaned_data
 ```
+
+- 修改密码
+    - 登录的情况下，直接验证旧密码来设置
+    - 未登录的情况下，忘记密码，发送验证码到邮箱
+
+- 直接验证旧密码来设置新密码
+    - 添加修改密码表单
+    - 添加views处理逻辑
+    - 添加url

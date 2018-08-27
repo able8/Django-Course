@@ -21,7 +21,7 @@ l{% block content %}
                     {% else %} 未绑定 <a href="{% url 'bind_email' %}">绑定邮箱</a>
                     {% endif %}</li>
                 <li>上次登录的时间: {{ user.last_login|date:"Y-m-d H:i:s" }}</li>
-                <li><a href="#">修改密码</a></li>
+                <li><a href="{% url 'change_password' %}">修改密码</a></li>
             </ul>
             {% else %}
                 <span>未登录，跳转到首页....</span>

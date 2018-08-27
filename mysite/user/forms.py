@@ -25,7 +25,8 @@ class LoginForm(forms.Form):
     def clean(self):
         username_or_email = self.cleaned_data['username_or_email']
         password = self.cleaned_data['password']
-        user = auth.authenticate(username_or_email=username_or_email, password=password)
+        user = auth.authenticate(
+            username=username_or_email, password=password)
         if user is None:
             if User.objects.filter(email=username_or_email).exists():
                 username = User.objects.get(email=username_or_email).username
@@ -195,3 +196,42 @@ class BindEmailForm(forms.Form):
         if verification_code == '':
             raise forms.ValidationError('验证码不能为空')
         return verification_code
+
+
+class ChangePasswordForm(forms.Form):
+    old_password = forms.CharField(
+        label='旧的密码',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': '请输入旧的密码'
+        }))
+    new_password = forms.CharField(
+        label='新的密码',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': '请输入新的密码'
+        }))
+    new_password_again = forms.CharField(
+        label='请再次输入新的密码',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': '请再次输入新的密码'
+        }))
+
+    def __init__(self, *args, **kwargs):
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+        super(ChangePasswordForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        # 验证新的密码是否一致
+        new_password = self.cleaned_data.get('new_password', '')
+        new_password_again = self.cleaned_data.get('new_password_again', '')
+        if new_password != new_password_again or new_password == '':
+            raise forms.ValidationError('两次输入的密码不一致')
+
+    def clean_old_password(self):
+        # 验证旧的密码是否正确
+        old_password = self.cleaned_data.get('old_password', '')
+        if not self.user.check_password(old_password):
+            raise forms.ValidationError('旧的密码错误')

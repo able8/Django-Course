@@ -45,6 +45,10 @@ Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.
     - [34.评论发送邮件通知](#34%E8%AF%84%E8%AE%BA%E5%8F%91%E9%80%81%E9%82%AE%E4%BB%B6%E9%80%9A%E7%9F%A5)
     - [35.部署准备（一）：Git](#35%E9%83%A8%E7%BD%B2%E5%87%86%E5%A4%87%E4%B8%80git)
     - [36.部署准备（二）：MySQL](#36%E9%83%A8%E7%BD%B2%E5%87%86%E5%A4%87%E4%BA%8Cmysql)
+- [创建用户](#%E5%88%9B%E5%BB%BA%E7%94%A8%E6%88%B7)
+- [添加权限，mysite_db 得所有表](#%E6%B7%BB%E5%8A%A0%E6%9D%83%E9%99%90mysitedb-%E5%BE%97%E6%89%80%E6%9C%89%E8%A1%A8)
+- [刷新权限](#%E5%88%B7%E6%96%B0%E6%9D%83%E9%99%90)
+    - [成功，数据都正常，没问题](#%E6%88%90%E5%8A%9F%E6%95%B0%E6%8D%AE%E9%83%BD%E6%AD%A3%E5%B8%B8%E6%B2%A1%E9%97%AE%E9%A2%98)
     - [37.部署准备（三）：服务器](#37%E9%83%A8%E7%BD%B2%E5%87%86%E5%A4%87%E4%B8%89%E6%9C%8D%E5%8A%A1%E5%99%A8)
     - [38.用Apache+mod_wsgi部署](#38%E7%94%A8apachemodwsgi%E9%83%A8%E7%BD%B2)
 
@@ -3009,6 +3013,105 @@ if email != '':
     - `git reset --hard commit_id` 危险，会丢失更改。回退重置 工作区 和 暂存区，丢失tracked文件的更改! Resets the index and working tree. Any changes to tracked files in the working tree since commit are discarded.
 
 ## 36.部署准备（二）：MySQL
+
+- MySQL 是一款框平台的开源的关系型数据库
+    - 为服务器端而设计，高并发访问
+    - SQlite 轻量级，可嵌入，不能高并发访问，适用桌面应用和手机应用
+
+- wheel whl 包，是编译好的包，可以直接安装，不会出编译错误
+
+- SQlite 迁移 MySQL， 先导出数据，再更改为 MySQL 数据库设置, 再导入数据
+    - 使用 Django 导出导入数据的命令完成迁移
+    - `python manage.py dumpdata > data.json`
+    - `python manage.py loaddata data.json`
+
+- 默认字符集推荐 utf8mb4
+
+```sh
+myslq -u root -p
+# 修改密码
+alter user 'root'@'localhost' identified by 'pwd123456'
+# 创建数据库
+create database mysite_db default charset=utf8mb4 collate utf8mb4_general_ci;
+show databases;
+# 创建用户
+create user 'able'@'localhost' identified by 'pwd123456';
+# 添加权限，mysite_db 得所有表
+grant all privileges on mysite_db.* to 'able'@'localhost';
+# 刷新权限
+flush privileges;
+myslq -u able -p
+show databases;
+
+Django 数据库设置
+# Database
+# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mysite_db',
+        'USER': 'able',
+        'PASSWORD': 'pwd123456',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    }
+}
+
+django.core.exceptions.ImproperlyConfigured: Error loading MySQLdb module.
+Did you install mysqlclient?
+pip install mysqlclient
+然后 迁移数据库
+python manage.py migrate
+python manage.py createcachetable
+python manage.py runserver
+
+时区问题，加载时区描述表  myslq_tzinfo_to_sql
+```
+
+- 实践迁移到 docker mysql
+    1. 启动数据库，创建数据库，创建用户，添加权限
+    2. 导出数据库，修改settings设置新数据库参数
+    3. 迁移数据库，提示安装`pip install mysqlclient`
+    4. 导入数据，`python manage.py runserver`
+    5. 无法启动，`python manage.py createcachetable` 可以了
+    6. 成功，数据都正常，没问题
+
+```sh
+Starting a MySQL instance is simple:  # 加上端口 用localhost可以连接
+docker run --name mysql-test -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql
+docker stop mysql-test
+docker restart mysql-test
+docker rm -f mysql-test
+docker exec -it mysql-test bash
+docker exec -it mysql-test mysql -uroot -p123456
+```
+
+- 出现问题及解决方法
+    - 无法连接数据库
+
+```
+(2002, "Can't connect to local MySQL server through socket '/tmp/mysql.sock'(2)")
+(1045, "Access denied for user 'able'@'172.17.0.1' (using password: YES)")
+
+CREATE USER 'username'@'host' IDENTIFIED BY 'password';
+说明：username：你将创建的用户名
+host：指定该用户在哪个主机上可以登陆，如果是本地用户可用localhost，如果想让该用户可以从任意远程主机登陆，可以使用通配符%
+CREATE USER 'pig'@'%';
+删除用户 DROP USER 'username'@'host';
+
+# 创建用户
+create user 'able'@'%' identified by 'pwd123456';
+# 添加权限，mysite_db 得所有表
+grant all privileges on mysite_db.* to 'able'@'%';
+# 刷新权限
+flush privileges;
+mysql -u able -p
+show databases;
+
+django.db.utils.ProgrammingError: (1146, "Table 'mysite_db.my_cache_table' doesn't exist")
+python manage.py createcachetable
+```
 
 ## 37.部署准备（三）：服务器
 

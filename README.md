@@ -3115,4 +3115,18 @@ python manage.py createcachetable
 
 ## 37.部署准备（三）：服务器
 
+- 服务器，流通消息，存储数据
+    - 服务器就是为我们提供服务的计算机
+    - 访问某个网站实际上是访问某个服务器给我们提供的信息
+
 ## 38.用Apache+mod_wsgi部署
+
+- web 服务器怎么提供服务
+
+![web 服务器怎么提供服务](images/web.png)
+
+- Linux 常见的web服务器软件
+    - Apache 模块多，功能强大
+    - Nginx(Engine-x) 轻量级，抗高并发，速度快
+
+- [Deployment checklist¶](https://docs.djangoproject.com/zh-hans/2.0/howto/deployment/checklist/)

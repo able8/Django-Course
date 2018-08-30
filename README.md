@@ -2,9 +2,31 @@
 
 Python Django Web开发  入门到实践 视频地址：<https://space.bilibili.com/252028233/>
 
+## 其它学习资料
+
+- [自强学堂 Django教程](https://code.ziqiangxuetang.com/django/django-tutorial.html)
+- [Django 2 零基础 - 待办清单网站](https://www.bilibili.com/video/av24293644/?p=11)
+- [千锋Django视频教程](https://www.bilibili.com/video/av19158405/?p=3&t=152)
+- [Django 官方文档](https://docs.djangoproject.com/zh-hans/2.0/)
+- [python 数据结构与算法系列课程](https://www.bilibili.com/video/av21540971/)
+- [python 操作Mysql、Redis、MongoDB数据库](https://www.bilibili.com/video/av25705756)
+- [Python Web 入坑指南](https://python-web-guide.readthedocs.io/zh/latest/index.html)
+- [Python 数据结构与算法 - 北大](http://www.yunhuai.net/DSA2018/DSA2018.html)
+- [算法图解](https://book.douban.com/subject/26979890/) , 图解的形式很适合新手，示例使用的是 python。
+- [python 面试题](https://github.com/taizilongxu/interview_python)
+- [Stack Overflow关于Python的部分](https://taizilongxu.gitbooks.io/stackoverflow-about-python/content/index.html)
+- [Python Cookbook](https://python3-cookbook-personal.readthedocs.io/zh_CN/latest/copyright.html)
+- [The Python Standard Library](https://docs.python.org/3/library/index.html)
+- [Python HOWTOs](https://docs.python.org/3/howto/index.html)
+- [Python 3 Module of the Week](https://pymotw.com/3/index.html)
+- [Cpython 源码](https://github.com/python/cpython)
+- [python-regex-cheatsheet](https://github.com/tartley/python-regex-cheatsheet/blob/master/cheatsheet.rst)
+- [python code examples](https://www.programcreek.com/python/)
+
 看视频整理要点笔记:
 
 - [Django_Course](#djangocourse)
+    - [其它学习资料](#%E5%85%B6%E5%AE%83%E5%AD%A6%E4%B9%A0%E8%B5%84%E6%96%99)
     - [01.什么是Django](#01%E4%BB%80%E4%B9%88%E6%98%AFdjango)
         - [1. 什么是Django](#1-%E4%BB%80%E4%B9%88%E6%98%AFdjango)
         - [2. Django版本选择](#2-django%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9)
@@ -3086,7 +3108,7 @@ docker exec -it mysql-test mysql -uroot -p123456
 - 出现问题及解决方法
     - 无法连接数据库
 
-```
+```sh
 (2002, "Can't connect to local MySQL server through socket '/tmp/mysql.sock'(2)")
 (1045, "Access denied for user 'able'@'172.17.0.1' (using password: YES)")
 
